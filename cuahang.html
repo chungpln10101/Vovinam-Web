@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cửa Hàng - VOVINAM EAM'DROH</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <h1>VOVINAM EAM'DROH</h1>
+        </div>
+        <nav class="menu">
+            <ul>
+                <li><a href="index.html">TRANG CHỦ</a></li>
+                <li><a href="#">CÂU LẠC BỘ</a></li>
+                <li><a href="tintuc.html">TIN TỨC</a></li>
+                <li><a href="cuahang.html" style="color: #0056b3;">CỬA HÀNG</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button class="btn-login" onclick="window.location.href='dangnhap.html'">ĐĂNG NHẬP</button>
+            <button class="btn-register" onclick="window.location.href='dangky.html'">ĐĂNG KÝ</button>
+        </div>
+    </header>
+
+    <main class="store-page-container">
+        <div class="store-header">
+            <h2 class="section-title">CỬA HÀNG VOVINAM</h2>
+            <div class="cart-badge">
+                🛒 Giỏ hàng: <span class="cart-count">0</span>
+            </div>
+        </div>
+
+        <div class="search-bar-modern">
+            <input type="text" id="oTimKiem" placeholder="Nhập tên võ phục, binh khí cần tìm..." onkeyup="timKiemSanPham()">
+            <button>🔍 Tìm kiếm</button>
+        </div>
+
+        <div class="categories-modern" id="danhMucNut">
+            <button class="active" onclick="locSanPham('tat-ca', this)">Tất cả</button>
+            <button onclick="locSanPham('vo-phuc', this)">Võ phục</button>
+            <button onclick="locSanPham('phu-kien', this)">Phụ kiện</button>
+            <button onclick="locSanPham('binh-khi', this)">Binh Khí</button>
+        </div>
+
+        <div class="product-grid" id="luoiSanPham">
+            
+            <div class="product-card" data-category="vo-phuc">
+                <a href="chitiet.html?id=vo-phuc" style="text-decoration: none; color: inherit;">
+                    <img src="vo-phuc.jpg" alt="Võ phục Vovinam">
+                    <h3>Võ phục Vovinam</h3>
+                </a>
+                <p class="price">170.000 VNĐ</p>
+                <button class="btn-add-cart">🛒 Thêm vào giỏ</button>
+            </div>
+            
+            <div class="product-card" data-category="phu-kien">
+                <a href="chitiet.html?id=dai-vang" style="text-decoration: none; color: inherit;">
+                    <img src="dai-vang.jpg" alt="Đai vàng">
+                    <h3>Đai vàng các cấp</h3>
+                </a>
+                <p class="price">170.000 VNĐ</p>
+                <button class="btn-add-cart">🛒 Thêm vào giỏ</button>
+            </div>
+
+            <div class="product-card" data-category="phu-kien">
+                <a href="chitiet.html?id=lam-dai" style="text-decoration: none; color: inherit;">
+                    <img src="lam-dai.jpg" alt="Lam đai">
+                    <h3>Lam đai</h3>
+                </a>
+                <p class="price">170.000 VNĐ</p>
+                <button class="btn-add-cart">🛒 Thêm vào giỏ</button>
+            </div>
+
+            <div class="product-card" data-category="binh-khi">
+                <a href="chitiet.html?id=kiem-nhom" style="text-decoration: none; color: inherit;">
+                    <img src="kiem-nhom.jpg" alt="Kiếm nhôm">
+                    <h3>Kiếm nhôm Vovinam</h3>
+                </a>
+                <p class="price">170.000 VNĐ</p>
+                <button class="btn-add-cart">🛒 Thêm vào giỏ</button>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3 class="footer-logo">VOVINAM EA M'DROH</h3>
+                <p class="slogan">"Tinh Hoa Võ Thuật Việt Nam"</p>
+                <p class="sub-slogan">Rèn luyện thân thể - Tu dưỡng tinh thần</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>LIÊN HỆ</h4>
+                <p>📞 Hotline BCN: <strong>0922.904.904</strong></p>
+                <p>✉️ Email: <strong>chungpln10101@gmail.com</strong></p>
+                <p>📍 Địa chỉ: Cư M'gar, Đắk Lắk</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>KẾT NỐI VỚI CHÚNG TÔI</h4>
+                <div class="social-links">
+                    <a href="#" class="social-icon">Facebook</a>
+                    <a href="#" class="social-icon">Youtube</a>
+                    <a href="#" class="social-icon">Zalo</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2026 Vovinam Việt Võ Đạo - Ea M'droh. Thiết kế và phát triển bởi Phùng Lữ Ngọc Chung.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

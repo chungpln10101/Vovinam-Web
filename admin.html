@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản trị | Vovinam</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+
+    <div id="adminLoginBox" class="admin-login-container">
+        <div class="admin-login-card">
+            <h2 style="color: #001f3f; margin-bottom: 20px;">ĐĂNG NHẬP QUẢN TRỊ</h2>
+            <input type="password" id="adminPassword" placeholder="Nhập mật khẩu quản trị..." class="admin-input">
+            <button class="btn-admin-login" onclick="kiemTraAdmin()">MỞ KHÓA BẢNG ĐIỀU KHIỂN</button>
+            <p id="adminError" style="color: red; display: none; margin-top: 15px; font-weight: bold;">❌ Sai mật khẩu! Vui lòng thử lại.</p>
+        </div>
+    </div>
+
+    <div id="adminDashboard" class="admin-dashboard-container" style="display: none;">
+        <div class="admin-header">
+            <h2>⚙️ TRUNG TÂM QUẢN TRỊ VOVINAM</h2>
+            <div>
+                <a href="index.html" class="btn-view-site" target="_blank">Xem Website</a>
+                <button class="btn-logout" onclick="dangXuatAdmin()">Đăng xuất</button>
+            </div>
+        </div>
+        
+        <div class="admin-content">
+            <h3>Quản lý Sản phẩm Cửa hàng</h3>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Mã (ID)</th>
+                        <th>Tên Sản Phẩm</th>
+                        <th>Giá Bán</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="bangSanPham">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

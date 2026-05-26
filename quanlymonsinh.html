@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Môn Sinh | Admin Vovinam</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+
+    <nav class="navbar">
+        <div class="logo"><h1>VOVINAM EAM'DROH</h1></div>
+        <div class="menu">
+            <ul>
+                <li><a href="index.html">TRANG CHỦ</a></li>
+                <li><a href="tintuc.html">TIN TỨC</a></li>
+                <li><a href="cuahang.html">CỬA HÀNG</a></li>
+            </ul>
+        </div>
+        <div class="auth-buttons">
+            </div>
+    </nav>
+
+    <main style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <h2 style="color: #e53e3e; font-size: 28px; font-weight: 800;">👑 HỆ THỐNG QUẢN LÝ MÔN SINH</h2>
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="font-weight: bold; color: #001f3f;">Lọc theo CLB:</label>
+                <select id="locDanhSachCLB" style="padding: 10px 15px; border: 2px solid #0056b3; border-radius: 8px; font-size: 15px; font-weight: bold; color: #0056b3; outline: none; cursor: pointer;">
+                    <option value="tat-ca">🌍 Tất cả các CLB</option>
+                    <option value="CLB Lê Hữu Trác">CLB Lê Hữu Trác</option>
+                    <option value="CLB Nguyễn Huệ">CLB Nguyễn Huệ</option>
+                    <option value="CLB Hùng Vương">CLB Hùng Vương</option>
+                    <option value="CLB Y Ngông">CLB Y Ngông</option>
+                    <option value="CLB Nội Trú">CLB Nội Trú</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background-color: #001f3f; color: white;">
+                        <th style="padding: 15px; border-top-left-radius: 10px; text-align: center;">STT</th>
+                        <th style="padding: 15px;">Họ và tên thực</th>
+                        <th style="padding: 15px;">Số điện thoại</th>
+                        <th style="padding: 15px;">Tên tài khoản</th>
+                        <th style="padding: 15px;">Câu Lạc Bộ</th>
+                        <th style="padding: 15px;">Vai trò</th>
+                        <th style="padding: 15px; border-top-right-radius: 10px; text-align: center;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyDanhSachMonSinh">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

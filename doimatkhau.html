@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đổi Mật Khẩu | Vovinam Ea M'droh</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+
+    <nav class="navbar">
+        <div class="logo"><h1>VOVINAM EAM'DROH</h1></div>
+        <div class="menu">
+            <ul>
+                <li><a href="index.html">TRANG CHỦ</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">CÂU LẠC BỘ</a>
+                    <div class="dropdown-content">
+                        <a href="diemdanh.html">🎯 Điểm danh CLB</a>
+                        <a href="#">ℹ️ Thông tin CLB</a>
+                    </div>
+                </li>
+                <li><a href="tintuc.html">TIN TỨC</a></li>
+                <li><a href="cuahang.html">CỬA HÀNG</a></li>
+            </ul>
+        </div>
+        <div class="auth-buttons">
+            <button class="btn-login" onclick="window.location.href='dangnhap.html'">ĐĂNG NHẬP</button>
+            <button class="btn-register" onclick="window.location.href='dangky.html'">ĐĂNG KÝ</button>
+        </div>
+    </nav>
+
+    <main class="auth-page-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>ĐỔI MẬT KHẨU</h2>
+                <p id="txtTenTaiKhoanHienTai">Đang xác thực tài khoản...</p>
+            </div>
+
+            <form id="formDoiMatKhau" class="auth-form">
+                <div class="form-group">
+                    <label>Mật khẩu mới:</label>
+                    <input type="password" id="mkMoi" placeholder="Nhập mật khẩu mới..." required>
+                </div>
+
+                <div class="form-group">
+                    <label>Nhập lại mật khẩu mới:</label>
+                    <input type="password" id="mkMoiNhapLai" placeholder="Xác nhận mật khẩu mới..." required>
+                </div>
+
+                <button type="submit" class="btn-auth">CẬP NHẬT MẬT KHẨU</button>
+            </form>
+            
+            <div class="auth-footer">
+                <a href="index.html">⬅ Quay lại Trang chủ</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-bottom">
+            <p>© 2026 Vovinam Việt Võ Đạo - Ea M'droh. Thiết kế và phát triển bởi Phùng Lữ Ngọc Chung.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

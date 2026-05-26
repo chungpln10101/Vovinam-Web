@@ -1023,9 +1023,41 @@ function dongPopupQR() {
 
 let khoMonSinhDiemDanh = []; // Kho lưu trữ tạm để lọc
 
-// 1. Khởi chạy khi mở trang Điểm danh
+// 1. Khởi chạy khi mở trang Điểm danh (Đã cấp quyền thông minh)
 window.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById("bodyDanhSachDiemDanh")) {
+        
+        const daDangNhap = localStorage.getItem("daDangNhap");
+        let vaiTro = localStorage.getItem("vaiTroDangNhap");
+        let clbCuaToi = localStorage.getItem("clbDangNhap");
+        if (vaiTro) vaiTro = vaiTro.trim();
+
+        // 1. Nếu chưa đăng nhập (Khách lạ) -> Đá văng ra ngoài
+        if (daDangNhap !== "true") {
+            alert("⛔ Bạn cần đăng nhập để xem danh sách Câu lạc bộ!");
+            window.location.href = "dangnhap.html";
+            return; 
+        }
+
+        // 2. Nếu là môn sinh bình thường -> Khóa các chức năng quản trị
+        if (vaiTro !== "Admin") {
+            // Đổi tiêu đề cho phù hợp
+            const tieuDe = document.querySelector('h2');
+            if(tieuDe) tieuDe.innerHTML = "👥 DANH SÁCH MÔN SINH";
+
+            // Ẩn nút Lưu điểm danh
+            const nutLuu = document.querySelector('.btn-save-attendance');
+            if(nutLuu) nutLuu.style.display = 'none';
+
+            // Khóa ô chọn CLB (Bắt buộc chỉ xem được CLB của mình)
+            const boxChonCLB = document.getElementById('clbDiemDanh');
+            if(boxChonCLB) {
+                boxChonCLB.value = clbCuaToi;
+                boxChonCLB.disabled = true; // Làm mờ, cấm bấm chọn CLB khác
+                boxChonCLB.style.background = "#f1f5f9";
+            }
+        }
+
         // Tự điền ngày hôm nay
         const oNgay = document.getElementById('ngayDiemDanh');
         if (oNgay) oNgay.value = new Date().toISOString().split('T')[0];
@@ -1033,8 +1065,10 @@ window.addEventListener('DOMContentLoaded', function() {
         // Kéo danh sách toàn bộ môn sinh từ Sheets về
         layDuLieuMonSinhDeDiemDanh();
         
-        // Bắt sự kiện cho nút Lưu Điểm Danh
-        kichHoatNutLuuDiemDanh();
+        // Bắt sự kiện cho nút Lưu Điểm Danh (Nếu là Admin)
+        if (vaiTro === "Admin") {
+            kichHoatNutLuuDiemDanh();
+        }
     }
 });
 
@@ -1089,21 +1123,35 @@ function taiDanhSachDiemDanh() {
         if (capDai.includes("Hoàng")) colorClass = "belt-hoang-dai";
         else if (capDai.includes("Tự vệ")) colorClass = "belt-tu-ve";
 
+        // Kiểm tra xem ai đang xem bảng này
+        let vaiTroHienTai = localStorage.getItem("vaiTroDangNhap");
+        if (vaiTroHienTai) vaiTroHienTai = vaiTroHienTai.trim();
+
+        // Xác định cột cuối cùng (Hành động hoặc Trạng thái)
+        let cotCuoiCung = "";
+        if (vaiTroHienTai === "Admin") {
+            // Admin thì hiện nút Toggle xanh đỏ để điểm danh
+            cotCuoiCung = `
+                <div style="display: flex; justify-content: center;">
+                    <span class="status-toggle ${defaultClass}" onclick="toggleAttendanceStatus(this, '${ms.taiKhoan}')">
+                        ${defaultStatus}
+                    </span>
+                </div>
+            `;
+        } else {
+            // Môn sinh thì chỉ hiện tích xanh tĩnh
+            cotCuoiCung = `<span style="color: #10b981; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px;">✔ Đang sinh hoạt</span>`;
+        }
+
         html += `
             <tr style="border-bottom: 1px dashed #e2ebf4;">
                 <td style="padding: 15px; text-align: center; font-weight: bold; color: #64748b;">${index + 1}</td>
                 <td style="padding: 15px; font-weight: bold; color: #001f3f; font-size: 16px;">${ms.hoTen}</td>
-                
                 <td style="padding: 15px; text-align: center;">
                     <span class="belt-badge ${colorClass}">${capDai}</span>
                 </td>
-                
                 <td style="padding: 15px; text-align: center;">
-                    <div style="display: flex; justify-content: center;">
-                        <span class="status-toggle ${defaultClass}" onclick="toggleAttendanceStatus(this, '${ms.taiKhoan}')">
-                            ${defaultStatus}
-                        </span>
-                    </div>
+                    ${cotCuoiCung}
                 </td>
             </tr>
         `;
@@ -1269,5 +1317,476 @@ window.addEventListener('DOMContentLoaded', function() {
                 nutBam.disabled = false;
             });
         });
+    }
+});
+
+// ========================================================
+// CÁ NHÂN HÓA NÚT HÀNH ĐỘNG Ở TRANG CHI TIẾT CLB
+// ========================================================
+window.addEventListener('DOMContentLoaded', function() {
+    const nutHanhDong = document.getElementById('nutHanhDongCLB');
+    
+    if (nutHanhDong) {
+        const daDangNhap = localStorage.getItem("daDangNhap");
+        let vaiTro = localStorage.getItem("vaiTroDangNhap");
+        if (vaiTro) vaiTro = vaiTro.trim();
+
+        if (daDangNhap === "true") {
+            if (vaiTro === "Admin") {
+                // Giao diện cho Admin
+                nutHanhDong.innerText = "📋 QUẢN LÝ ĐIỂM DANH";
+                nutHanhDong.href = "diemdanh.html";
+                nutHanhDong.style.background = "#e53e3e"; 
+                nutHanhDong.style.boxShadow = "0 5px 15px rgba(229,62,62,0.3)";
+            } else {
+                // Giao diện cho Môn sinh bình thường
+                nutHanhDong.innerText = "👥 XEM DANH SÁCH MÔN SINH";
+                nutHanhDong.href = "diemdanh.html";
+                nutHanhDong.style.background = "#10b981"; // Màu xanh ngọc thân thiện
+                nutHanhDong.style.boxShadow = "0 5px 15px rgba(16,185,129,0.3)";
+            }
+        }
+    }
+});
+
+// ========================================================
+// HỆ THỐNG ĐỒNG BỘ VÀ HIỂN THỊ TIN TỨC TỪ GOOGLE SHEETS
+// ========================================================
+
+// 1. Tự động chạy ngay khi người đọc vừa mở trang tintuc.html
+window.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById("tinTieuDiemBox")) {
+        taiTinTucTuGoogleSheets();
+    }
+});
+
+// 2. Hàm gọi Google Sheets lôi dữ liệu báo chí về
+function taiTinTucTuGoogleSheets() {
+    const tieuDiemBox = document.getElementById("tinTieuDiemBox");
+    const tinNhoBox = document.getElementById("danhSachTinNhoBox");
+
+    fetch(MANG_LUOI_GOOGLE, {
+        method: "POST",
+        body: JSON.stringify({ action: "getNews" }) // Gọi đúng lệnh getNews trong Apps Script
+    })
+    .then(res => res.json())
+    .then(danhSachTin => {
+        if (danhSachTin.length === 0) {
+            tieuDiemBox.innerHTML = `<p style="text-align: center; padding: 40px; color: #64748b; font-size: 18px; font-weight: bold;">📰 Tòa soạn hiện tại chưa xuất bản bài viết nào.</p>`;
+            if (tinNhoBox) tinNhoBox.innerHTML = "";
+            return;
+        }
+
+        // --- BÀI 1: XỬ LÝ BÀI VIẾT TIÊU ĐIỂM (BÀI MỚI NHẤT, ĐẦU MẢNG) ---
+        const tin1 = danhSachTin[0];
+        
+        // Định dạng ngày tháng cho đẹp mắt
+        const ngayDang1 = new Date(tin1.thoiGian).toLocaleDateString('vi-VN');
+
+        tieuDiemBox.innerHTML = `
+            <div class="main-news-card" style="display: flex; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); flex-wrap: wrap;">
+                <div style="flex: 1.2; min-width: 300px; max-height: 450px; overflow: hidden;">
+                    <img src="${tin1.linkAnh}" alt="${tin1.tieuDe}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; min-width: 300px;">
+                    <span style="background: #fee2e2; color: #ef4444; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; align-self: flex-start; margin-bottom: 15px;">
+                        ${tin1.chuyenMuc}
+                    </span>
+                    <h2 style="color: #001f3f; font-size: 28px; font-weight: 800; line-height: 1.4; margin-bottom: 15px;">
+                        ${tin1.tieuDe}
+                    </h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">📅 Ngày đăng: ${ngayDang1}</p>
+                    
+                    <div class="news-content-body" style="color: #475569; line-height: 1.6; font-size: 15px; margin-bottom: 25px; max-height: 120px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;">
+                        ${tin1.noiDung}
+                    </div>
+                    
+                    <button onclick="moXemChiTietTinBao(${0})" style="background: #0056b3; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; align-self: flex-start; transition: 0.3s;">Đọc tiếp ➔</button>
+                </div>
+            </div>
+        `;
+
+        // --- BÀI 2: XỬ LÝ CÁC BÀI VIẾT NHỎ CÒN LẠI (XẾP LƯỚI Ở DƯỚI) ---
+        let htmlTinNho = "";
+        
+        for (let i = 1; i < danhSachTin.length; i++) {
+            const tin = danhSachTin[i];
+            const ngayDang = new Date(tin.thoiGian).toLocaleDateString('vi-VN');
+
+            htmlTinNho += `
+                <div class="sub-news-card" style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+                    <div style="height: 200px; overflow: hidden;">
+                        <img src="${tin.linkAnh}" alt="${tin.tieuDe}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
+                        <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; align-self: flex-start; margin-bottom: 10px;">
+                            ${tin.chuyenMuc}
+                        </span>
+                        <h3 style="color: #001f3f; font-size: 18px; font-weight: 700; line-height: 1.4; margin-bottom: 10px; flex: 1;">
+                            ${tin.tieuDe}
+                        </h3>
+                        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 15px;">📅 ${ngayDang}</p>
+                        <button onclick="moXemChiTietTinBao(${i})" style="background: transparent; color: #0056b3; border: 1px solid #0056b3; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%;">Đọc chi tiết</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (tinNhoBox) tinNhoBox.innerHTML = htmlTinNho;
+        
+        // Lưu toàn bộ danh sách tin vào biến toàn cục để khi bấm nút xem chi tiết còn lôi ra được
+        window.KHO_TIN_TUC_TOAN_CUC = danhSachTin;
+    })
+    .catch(err => {
+        console.error(err);
+        tieuDiemBox.innerHTML = `<p style="text-align: center; padding: 30px; font-weight: bold; color: #e53e3e;">❌ Thao tác tải tin tức thất bại do lỗi kết nối!</p>`;
+    });
+}
+
+// 3. Hàm xử lý hiển thị hộp thoại POPUP khi người dùng bấm xem chi tiết bài báo
+function moXemChiTietTinBao(index) {
+    const tin = window.KHO_TIN_TUC_TOAN_CUC[index];
+    if (!tin) return;
+
+    // Tự động tạo một cái hộp thoại Popup phủ đen toàn màn hình
+    const popup = document.createElement('div');
+    popup.id = "popupDocTinBao";
+    popup.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px;";
+
+    const ngayDang = new Date(tin.thoiGian).toLocaleDateString('vi-VN');
+
+    popup.innerHTML = `
+        <div style="background: white; width: 100%; max-width: 800px; max-height: 85vh; border-radius: 20px; overflow-y: auto; padding: 40px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideUp 0.3s ease;">
+            <button onclick="document.getElementById('popupDocTinBao').remove()" style="position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; font-size: 20px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-weight: bold; color: #64748b;">✕</button>
+            
+            <span style="background: #f1f5f9; color: #0056b3; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">${tin.chuyenMuc}</span>
+            <h1 style="color: #001f3f; font-size: 28px; font-weight: 800; margin-top: 15px; margin-bottom: 10px; line-height: 1.3;">${tin.tieuDe}</h1>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 25px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">📅 Ghi nhận ngày: ${ngayDang} | Tòa soạn VOVINAM EA M'DROH</p>
+            
+            <div style="width: 100%; max-height: 400px; overflow: hidden; border-radius: 12px; margin-bottom: 30px;">
+                <img src="${tin.linkAnh}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+
+            <div class="news-main-rich-text" style="color: #334155; line-height: 1.8; font-size: 16px;">
+                ${tin.noiDung}
+            </div>
+        </div>
+    `;
+
+    // Thêm hiệu ứng CSS chuyển động mượt mà cho popup
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .news-main-rich-text h2 { color: #001f3f; font-size: 22px; margin-top: 25px; margin-bottom: 15px; font-weight: 800; }
+        .news-main-rich-text h3 { color: #0056b3; font-size: 19px; margin-top: 20px; margin-bottom: 12px; font-weight: 700; }
+        .news-main-rich-text p { margin-bottom: 15px; text-align: justify; }
+        .news-main-rich-text strong { font-weight: bold; color: #001f3f; }
+        .news-main-rich-text ul, .news-main-rich-text ol { padding-left: 20px; margin-bottom: 15px; }
+    `;
+    document.head.appendChild(style);
+
+    document.body.appendChild(popup);
+}
+
+// ========================================================
+// ĐỒNG BỘ MENU THẢ XUỐNG (DROPDOWN) THEO PHÂN QUYỀN
+// ========================================================
+window.addEventListener('DOMContentLoaded', function() {
+    const linkDiemDanh = document.getElementById('navDiemDanhCLB');
+    const linkThongTin = document.getElementById('navThongTinCLB');
+    
+    // Nếu tìm thấy các nút menu này trên trang thì mới xử lý
+    if (linkDiemDanh || linkThongTin) {
+        const daDangNhap = localStorage.getItem("daDangNhap");
+        const clbCuaToi = localStorage.getItem("clbDangNhap"); // Lấy tên CLB của môn sinh
+        let vaiTro = localStorage.getItem("vaiTroDangNhap");
+        if (vaiTro) vaiTro = vaiTro.trim();
+
+        // Bản đồ định tuyến: Khớp tên CLB trên Sheets với file HTML tương ứng trên máy
+        const khoLinkCLB = {
+            "CLB Lê Hữu Trác": "clb-lehuutrac.html",
+            "CLB Nguyễn Huệ": "clb-nguyenhue.html",
+            "CLB Hùng Vương": "clb-hungvuong.html",
+            "CLB Y Ngông": "clb-yngong.html",
+            "CLB Nội Trú": "clb-noitru.html"
+        };
+
+        // TRƯỜNG HỢP 1: ĐÃ ĐĂNG NHẬP
+        if (daDangNhap === "true") {
+            if (vaiTro === "Admin") {
+                // Điều hướng dành cho HLV/Ban Chủ Nhiệm
+                if (linkDiemDanh) {
+                    linkDiemDanh.innerText = "🎯 Quản lý điểm danh";
+                    linkDiemDanh.href = "diemdanh.html";
+                }
+                if (linkThongTin) {
+                    linkThongTin.innerText = "ℹ️ Xem tất cả CLB";
+                    linkThongTin.href = "index.html#tieuDeCLB"; // Cuộn xuống danh sách CLB ở trang chủ
+                }
+            } else {
+                // Điều hướng dành riêng cho MÔN SINH (User)
+                if (linkDiemDanh) {
+                    linkDiemDanh.innerText = "👥 Xem danh sách lớp";
+                    linkDiemDanh.href = "diemdanh.html";
+                }
+                if (linkThongTin) {
+                    linkThongTin.innerText = "ℹ️ Thông tin CLB của tôi";
+                    // Tự động tìm file tương ứng với CLB của bạn môn sinh đó, nếu không có thì trả về trang chủ
+                    linkThongTin.href = khoLinkCLB[clbCuaToi] || "index.html"; 
+                }
+            }
+        } 
+        // TRƯỜNG HỢP 2: KHÁCH VÃNG LAI (CHƯA ĐĂNG NHẬP)
+        else {
+            if (linkDiemDanh) {
+                linkDiemDanh.innerText = "🔐 Đăng nhập để xem lớp";
+                linkDiemDanh.href = "dangnhap.html";
+            }
+            if (linkThongTin) {
+                linkThongTin.innerText = "ℹ️ Danh sách các CLB";
+                linkThongTin.href = "index.html"; // Chỉ hướng về trang chủ để xem tổng quan
+            }
+        }
+    }
+});
+
+// ========================================================
+// ĐỒNG BỘ TIN TỨC RA TRANG CHỦ (INDEX.HTML)
+// ========================================================
+window.addEventListener('DOMContentLoaded', function() {
+    const tinTucTrangChuBox = document.getElementById("tinTucTrangChuBox");
+    if (tinTucTrangChuBox) {
+        
+        // Gọi API lên Google Sheets để lấy danh sách bài viết
+        fetch(MANG_LUOI_GOOGLE, {
+            method: "POST",
+            body: JSON.stringify({ action: "getNews" })
+        })
+        .then(res => res.json())
+        .then(danhSachTin => {
+            if (danhSachTin.length === 0) {
+                tinTucTrangChuBox.innerHTML = `<p style="text-align: center; color: #64748b;">Tòa soạn hiện tại chưa xuất bản bài viết nào.</p>`;
+                return;
+            }
+
+            // Chỉ cắt lấy 2 bài mới nhất (đứng đầu mảng) để hiện ra trang chủ
+            const tinMoiNhat = danhSachTin.slice(0, 2);
+            let html = "";
+
+            tinMoiNhat.forEach(tin => {
+                // KỸ THUẬT QUAN TRỌNG: Dùng Regex xóa sạch các thẻ HTML (như <h2>, <strong>) 
+                // để tạo ra một đoạn trích dẫn toàn chữ sạch sẽ, không bị vỡ giao diện.
+                let trichDan = tin.noiDung.replace(/<[^>]+>/g, '');
+
+                html += `
+                    <a href="tintuc.html" style="display: flex; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; text-decoration: none; color: inherit; transition: 0.3s; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px; max-width: 300px; height: 180px;">
+                            <img src="${tin.linkAnh}" alt="${tin.tieuDe}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        
+                        <div style="padding: 20px 25px; flex: 2; min-width: 250px; display: flex; flex-direction: column; justify-content: center;">
+                            <span style="color: #e53e3e; font-size: 13px; font-weight: bold; margin-bottom: 8px;">${tin.chuyenMuc}</span>
+                            <h3 style="color: #0056b3; font-size: 20px; font-weight: 800; margin-top: 0; margin-bottom: 10px; line-height: 1.4;">${tin.tieuDe}</h3>
+                            <p style="color: #64748b; font-size: 14px; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;">
+                                ${trichDan}
+                            </p>
+                        </div>
+                    </a>
+                `;
+            });
+
+            // Thêm nút "Xem tất cả" trỏ về trang Tin Tức
+            html += `
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="tintuc.html" style="display: inline-block; padding: 12px 35px; background: #e2ebf4; color: #0056b3; font-size: 15px; font-weight: bold; border-radius: 30px; text-decoration: none; transition: background 0.3s;">
+                        Xem tất cả bảng tin ➔
+                    </a>
+                </div>
+            `;
+            tinTucTrangChuBox.innerHTML = html;
+        })
+        .catch(err => {
+            tinTucTrangChuBox.innerHTML = `<p style="text-align: center; color: #e53e3e; font-weight: bold;">❌ Lỗi kết nối! Không thể đồng bộ tin tức.</p>`;
+        });
+    }
+});
+
+// ========================================================
+// HỆ THỐNG QUẢN LÝ ĐƠN HÀNG (DÀNH CHO ADMIN) CHUẨN 100%
+// ========================================================
+
+window.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById("bodyDanhSachDonHang")) {
+        taiDanhSachDonHang();
+    }
+});
+
+function taiDanhSachDonHang() {
+    const bang = document.getElementById("bodyDanhSachDonHang");
+    bang.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; font-weight:bold; color:#64748b;">⏳ Đang tải danh sách đơn hàng...</td></tr>`;
+
+    fetch(MANG_LUOI_GOOGLE, {
+        method: "POST",
+        body: JSON.stringify({ action: "getOrders" }) 
+    })
+    .then(res => res.json())
+    .then(danhSachDon => {
+        if (danhSachDon.length === 0) {
+            bang.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color: #64748b;">Chưa có đơn đặt hàng nào trong hệ thống.</td></tr>`;
+            return;
+        }
+
+        let html = "";
+        const cacTrangThai = ["Chờ xử lý", "Đang chuẩn bị", "Đang giao hàng", "Đã hoàn thành", "Đã hủy"];
+
+        danhSachDon.forEach(don => {
+            const ngayDat = new Date(don.thoiGian).toLocaleString('vi-VN'); 
+            
+            let optionHtml = "";
+            cacTrangThai.forEach(tt => {
+                let selected = (don.trangThai === tt) ? "selected" : "";
+                optionHtml += `<option value="${tt}" ${selected}>${tt}</option>`;
+            });
+
+            let mauNen = "#fef08a"; 
+            if (don.trangThai === "Đã hoàn thành") mauNen = "#bbf7d0"; 
+            if (don.trangThai === "Đã hủy") mauNen = "#fecaca"; 
+            if (don.trangThai === "Đang giao hàng" || don.trangThai === "Đang chuẩn bị") mauNen = "#bfdbfe"; 
+
+            html += `
+                <tr style="border-bottom: 1px dashed #e2ebf4;">
+                    <td style="padding: 15px; color: #64748b; font-size: 13px;">🕒 ${ngayDat}</td>
+                    <td style="padding: 15px;">
+                        <strong style="color: #001f3f;">${don.hoTen}</strong><br>
+                        <span style="color: #e53e3e; font-weight: bold; font-size: 13px;">📞 ${don.sdt}</span><br>
+                        <span style="color: #64748b; font-size: 13px;">📍 ${don.diaChi}</span><br>
+                        <code style="background: #e2ebf4; padding: 2px 5px; border-radius: 4px; font-size: 12px; margin-top: 5px; display: inline-block;">Mã: ${don.maDonHang}</code>
+                    </td>
+                    <td style="padding: 15px; font-size: 14px; color: #475569; white-space: pre-wrap;">${don.chiTiet}</td>
+                    <td style="padding: 15px; color: #e53e3e; font-weight: bold;">${don.tongTien}</td>
+                    <td style="padding: 15px; text-align: center;">
+                        <select onchange="HLV_DoiTrangThaiDon('${don.maDonHang}', this.value)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: bold; color: #001f3f; cursor: pointer; outline: none; background-color: ${mauNen};">
+                            ${optionHtml}
+                        </select>
+                    </td>
+                </tr>
+            `;
+        });
+        bang.innerHTML = html;
+    })
+    .catch(err => {
+        bang.innerHTML = `<tr><td colspan="5" style="text-align:center; color: #e53e3e; font-weight:bold;">❌ Lỗi tải dữ liệu. Hãy kiểm tra mạng!</td></tr>`;
+    });
+}
+
+// KHỐI LỆNH NÀY SẼ CHẠY KHI ADMIN BẤM ĐỔI TRẠNG THÁI
+function HLV_DoiTrangThaiDon(maDonHang, trangThaiMoi) {
+    // 1. Hiện hộp thoại hỏi lại cho chuyên nghiệp
+    const xacNhan = confirm(`Bạn có chắc chắn muốn chuyển đơn hàng [ ${maDonHang} ] sang trạng thái: "${trangThaiMoi}" không?`);
+    if (!xacNhan) {
+        taiDanhSachDonHang(); // Trả lại trạng thái cũ nếu Admin đổi ý bấm Hủy
+        return;
+    }
+
+    // 2. Nếu đồng ý thì mới gửi lên máy chủ
+    fetch(MANG_LUOI_GOOGLE, {
+        method: "POST",
+        body: JSON.stringify({ action: "updateOrderStatus", maDonHang: maDonHang, trangThaiMoi: trangThaiMoi })
+    })
+    .then(res => res.text())
+    .then(ketQua => {
+        if (ketQua === "CapNhatDonThanhCong") {
+            alert(`📦 Đã cập nhật thành công!`);
+            taiDanhSachDonHang(); // Tải lại bảng để nó đổi màu nền cái nút
+        } else {
+            alert("Lỗi máy chủ: " + ketQua);
+        }
+    })
+    .catch(err => alert("❌ Thao tác thất bại do lỗi mạng!"));
+}
+
+// ========================================================
+// TẢI LỊCH SỬ MUA HÀNG CHO MÔN SINH (lichsudonhang.html)
+// ========================================================
+window.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById("bodyLichSuDonHang")) {
+        const daDangNhap = localStorage.getItem("daDangNhap");
+        const hoTenNguoiDung = localStorage.getItem("tenDangNhap"); 
+
+        if (daDangNhap !== "true" || !hoTenNguoiDung) {
+            alert("⛔ Bạn cần đăng nhập để xem lịch sử mua hàng!");
+            window.location.href = "dangnhap.html";
+            return;
+        }
+
+        taiLichSuDonHangCuaToi(hoTenNguoiDung);
+    }
+});
+
+function taiLichSuDonHangCuaToi(hoTen) {
+    const bang = document.getElementById("bodyLichSuDonHang");
+    bang.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 30px; font-weight:bold; color:#64748b;">⏳ Đang dò tìm lịch sử mua hàng của bạn...</td></tr>`;
+
+    fetch(MANG_LUOI_GOOGLE, {
+        method: "POST",
+        body: JSON.stringify({ action: "getMyOrders", hoTen: hoTen })
+    })
+    .then(res => res.json())
+    .then(danhSach => {
+        if (danhSach.length === 0) {
+            bang.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 40px; color: #64748b; font-size: 16px;">Bạn chưa đặt mua món đồ nào. <br><a href="cuahang.html" style="color: #0056b3; font-weight: bold; text-decoration: none; margin-top: 10px; display: inline-block;">🛒 Tham quan cửa hàng ngay</a></td></tr>`;
+            return;
+        }
+
+        let html = "";
+        danhSach.forEach(don => {
+            const ngayDat = new Date(don.thoiGian).toLocaleString('vi-VN');
+            
+            // Xử lý màu sắc hiển thị cho Trạng thái
+            let mauChu = "#ca8a04"; let mauNen = "#fef08a"; // Vàng (Chờ xử lý)
+            if (don.trangThai === "Đã hoàn thành") { mauChu = "#16a34a"; mauNen = "#dcfce7"; }
+            if (don.trangThai === "Đã hủy") { mauChu = "#dc2626"; mauNen = "#fee2e2"; }
+            if (don.trangThai === "Đang giao hàng" || don.trangThai === "Đang chuẩn bị") { mauChu = "#2563eb"; mauNen = "#dbeafe"; }
+
+            html += `
+                <tr style="border-bottom: 1px dashed #e2ebf4;">
+                    <td style="padding: 15px; color: #64748b; font-size: 13px;">
+                        <code style="background: #e2ebf4; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; color: #001f3f;">${don.maDonHang}</code><br>
+                        <span style="display: inline-block; margin-top: 8px;">🕒 ${ngayDat}</span>
+                    </td>
+                    <td style="padding: 15px; font-size: 14px; color: #475569; white-space: pre-wrap; line-height: 1.5;">${don.chiTiet}</td>
+                    <td style="padding: 15px; color: #e53e3e; font-weight: bold;">${don.tongTien}</td>
+                    <td style="padding: 15px; text-align: center;">
+                        <span style="background: ${mauNen}; color: ${mauChu}; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: bold;">
+                            ${don.trangThai}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+        bang.innerHTML = html;
+    })
+    .catch(err => {
+        bang.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #e53e3e; font-weight:bold;">❌ Lỗi kết nối máy chủ!</td></tr>`;
+    });
+}
+
+// ========================================================
+// HIỂN THỊ NÚT LỊCH SỬ ĐƠN HÀNG Ở TRANG CỬA HÀNG
+// ========================================================
+window.addEventListener('DOMContentLoaded', function() {
+    const btnLichSu = document.getElementById("btnLichSuDonHang");
+    
+    // Nếu tìm thấy cái nút này trên trang (tức là đang đứng ở cuahang.html)
+    if (btnLichSu) {
+        const daDangNhap = localStorage.getItem("daDangNhap");
+        
+        // Chỉ hiện nút nếu người dùng đã đăng nhập thành công
+        if (daDangNhap === "true") {
+            btnLichSu.style.display = "inline-flex"; 
+        }
     }
 });

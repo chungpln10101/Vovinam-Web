@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Nhập | Vovinam Ea M'droh</title>
+    <title>CLB Lê Hữu Trác | Vovinam Ea M'droh</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="auth-body">
@@ -30,29 +30,30 @@
         </div>
     </nav>
 
-    <main class="auth-page-container">
-        <div class="auth-box">
-            <div class="auth-header">
-                <h2>ĐĂNG NHẬP</h2>
-                <p>Chào mừng bạn quay trở lại CLB Vovinam</p>
+    <main style="max-width: 1000px; margin: 40px auto; padding: 0 20px;">
+        <a href="index.html" style="color: #0056b3; text-decoration: none; font-weight: bold;">⬅ Về trang chủ</a>
+        
+        <div style="background: white; border-radius: 20px; padding: 40px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;">
+            <img src="logo-hung-vuong.png" alt="Logo Hùng Vương" style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; object-fit: cover;">
+            <h1 style="color: #001f3f; font-size: 32px; margin-bottom: 10px;">CÂU LẠC BỘ VOVINAM HÙNG VƯƠNG</h1>
+            <p style="color: #64748b; font-size: 16px; margin-bottom: 30px;">Trực thuộc: Trường THCS Hùng Vương</p>
+
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; text-align: left;">
+                <div style="flex: 1; min-width: 250px; background: #f8fafc; padding: 20px; border-radius: 15px; border-left: 5px solid #0056b3;">
+                    <h3 style="color: #0056b3; margin-bottom: 10px;">⏰ Lịch Tập Luyện</h3>
+                    <p><strong>Thứ 3:</strong> 17h30 - 19h30</p>
+                    <p><strong>Thứ 5:</strong> 17h30 - 19h30</p>
+                </div>
+                <div style="flex: 1; min-width: 250px; background: #f8fafc; padding: 20px; border-radius: 15px; border-left: 5px solid #e53e3e;">
+                    <h3 style="color: #e53e3e; margin-bottom: 10px;">📍 Địa Điểm</h3>
+                    <p>Nhà đa năng, Trường THCS Hùng Vương.</p>
+                    <p>Vui lòng đến trước 10 phút để khởi động và chuẩn bị võ phục.</p>
+                </div>
             </div>
-
-            <form id="formDangNhap" class="auth-form">
-                <div class="form-group">
-                    <label>Tên tài khoản:</label>
-                    <input type="text" id="dnTaiKhoan" placeholder="Nhập tên tài khoản..." required>
-                </div>
-
-                <div class="form-group">
-                    <label>Mật khẩu:</label>
-                    <input type="password" id="dnMatKhau" placeholder="Nhập mật khẩu..." required>
-                </div>
-
-                <button type="submit" class="btn-auth">ĐĂNG NHẬP NGAY</button>
-            </form>
-
-            <div class="auth-footer">
-                <p>Chưa có tài khoản? <a href="dangky.html">Đăng ký ngay</a></p>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="https://zalo.me/922904904" id="nutHanhDongCLB" target="_blank" style="display: inline-block; background: #0056b3; color: white; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px; text-decoration: none; box-shadow: 0 5px 15px rgba(0,86,179,0.3); transition: 0.3s;">
+                    📞 LIÊN HỆ HUẤN LUYỆN VIÊN
+                </a>
             </div>
         </div>
     </main>
@@ -82,6 +83,7 @@
             <p>© 2026 Vovinam Việt Võ Đạo - Ea M'droh. Thiết kế và phát triển bởi Phùng Lữ Ngọc Chung.</p>
         </div>
     </footer>
+
     <script src="script.js"></script>
 </body>
 </html>

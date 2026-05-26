@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Nhập | Vovinam Ea M'droh</title>
+    <title>Chi tiết sản phẩm | Vovinam Ea M'droh</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="auth-body">
+<body>
 
     <nav class="navbar">
         <div class="logo"><h1>VOVINAM EAM'DROH</h1></div>
@@ -30,32 +30,49 @@
         </div>
     </nav>
 
-    <main class="auth-page-container">
-        <div class="auth-box">
-            <div class="auth-header">
-                <h2>ĐĂNG NHẬP</h2>
-                <p>Chào mừng bạn quay trở lại CLB Vovinam</p>
+    <main class="product-detail-container">
+        <a href="cuahang.html" class="back-link">⬅ Quay lại cửa hàng</a>
+
+        <div class="product-detail-wrapper">
+            <div class="product-gallery">
+                <img src="" alt="Sản phẩm" class="main-image" id="anhChiTiet">
             </div>
 
-            <form id="formDangNhap" class="auth-form">
-                <div class="form-group">
-                    <label>Tên tài khoản:</label>
-                    <input type="text" id="dnTaiKhoan" placeholder="Nhập tên tài khoản..." required>
+            <div class="product-info">
+                <span class="category-tag" id="loaiChiTiet">Danh mục</span>
+                <h2 class="product-title" id="tenChiTiet">Tên sản phẩm</h2>
+                <p class="product-price" id="giaChiTiet">0 VNĐ</p>
+                <p class="product-status">Tình trạng: <span class="in-stock">✔ Còn hàng</span></p>
+                
+                <div class="product-description">
+                    <h3>Mô tả sản phẩm:</h3>
+                    <p id="moTaChiTiet">Nội dung mô tả...</p>
+                </div>
+                
+
+                <div class="product-options">
+                    <label for="size-select"><strong>Chọn kích cỡ (Size):</strong></label>
+                    <select id="size-select" class="size-selector">
+                        <option value="1">Size 1 (1m10 - 1m20)</option>
+                        <option value="2">Size 2 (1m20 - 1m30)</option>
+                        <option value="3">Size 3 (1m30 - 1m40)</option>
+                        <option value="4">Size 4 (1m40 - 1m50)</option>
+                        <option value="5">Size 5 (1m50 - 1m60)</option>
+                    </select>
                 </div>
 
-                <div class="form-group">
-                    <label>Mật khẩu:</label>
-                    <input type="password" id="dnMatKhau" placeholder="Nhập mật khẩu..." required>
+                <div class="product-actions">
+                    <div class="quantity-box">
+                        <label><strong>Số lượng:</strong></label>
+                        <input type="number" value="1" min="1" class="qty-input">
+                    </div>
+                    <button class="btn-add-cart-large">🛒 THÊM VÀO GIỎ HÀNG</button>
                 </div>
-
-                <button type="submit" class="btn-auth">ĐĂNG NHẬP NGAY</button>
-            </form>
-
-            <div class="auth-footer">
-                <p>Chưa có tài khoản? <a href="dangky.html">Đăng ký ngay</a></p>
             </div>
         </div>
     </main>
+
+    <script src="script.js"></script>
 
     <footer class="footer">
         <div class="footer-container">
@@ -82,6 +99,6 @@
             <p>© 2026 Vovinam Việt Võ Đạo - Ea M'droh. Thiết kế và phát triển bởi Phùng Lữ Ngọc Chung.</p>
         </div>
     </footer>
-    <script src="script.js"></script>
+
 </body>
 </html>

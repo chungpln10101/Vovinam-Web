@@ -1734,3 +1734,118 @@ button:active { transform: scale(0.95); transition: transform 0.1s; }
 .btn-close-modal:hover {
     background: #001f3f !important;
 }
+
+/* ========================================= */
+/* CSS CHO KHUNG ĐỊA CHỈ & MÃ GIẢM GIÁ */
+/* ========================================= */
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    margin-top: 5px;
+    outline: none;
+    transition: 0.3s;
+}
+.form-control:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 86, 179, 0.2);
+}
+
+.discount-wrapper {
+    background: #f1f5f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px dashed #94a3b8;
+}
+
+.discount-box {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.discount-box input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    font-weight: bold;
+    color: #e53e3e;
+}
+
+.btn-apply {
+    background: #001f3f;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-apply:hover {
+    background: #0056b3;
+}
+
+/* ========================================= */
+/* CSS CHO NÚT TRẠNG THÁI ĐIỂM DANH TOGGLE */
+/* ========================================= */
+.status-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
+    user-select: none; /* Tránh bôi đen chữ khi click nhanh */
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.status-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+}
+
+.status-toggle.present {
+    background-color: #10b981; /* Màu xanh lá cho "Có mặt" */
+    color: white;
+}
+
+.status-toggle.absent {
+    background-color: #e53e3e; /* Màu đỏ cho "Vắng" */
+    color: white;
+}
+
+/* ========================================= */
+/* CSS CHO NHÃN CẤP ĐAI (BELT BADGE) */
+/* ========================================= */
+.belt-badge {
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-weight: 900;
+    font-size: 13px;
+    display: inline-block;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.belt-tu-ve { 
+    background: #e2ebf4; 
+    color: #475569; 
+}
+.belt-lam-dai { 
+    background: #0056b3; 
+    color: white; 
+}
+.belt-hoang-dai { 
+    background: #ffc107; 
+    color: #001f3f; 
+}

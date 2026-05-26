@@ -14,9 +14,9 @@
             <ul>
                 <li><a href="index.html">TRANG CHỦ</a></li>
                 <li class="dropdown">
-                    <a href="#" class="dropbtn">CÂU LẠC BỘ</a>
+                    <a href="#" class="dropbtn" style="color: #0056b3; font-weight: bold;">CÂU LẠC BỘ</a>
                     <div class="dropdown-content">
-                        <a href="diemdanh.html">🎯 Điểm danh CLB</a>
+                        <a href="diemdanh.html" style="color: #e53e3e; font-weight: bold;">🎯 Điểm danh CLB</a>
                         <a href="#">ℹ️ Thông tin CLB</a>
                     </div>
                 </li>
@@ -30,84 +30,44 @@
         </div>
     </nav>
 
-    <main class="attendance-page-container">
+    <main style="max-width: 1000px; margin: 40px auto; padding: 0 20px;">
         
-        <div class="attendance-controls">
-            <h2 class="section-title" style="margin-bottom: 0;">ĐIỂM DANH VÕ SINH</h2>
-            <div class="control-filters">
-                <select class="filter-select">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+            <h2 style="color: #0056b3; font-size: 24px; font-weight: 800; margin: 0;">📋 ĐIỂM DANH VÕ SINH</h2>
+            
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <select id="clbDiemDanh" class="filter-select" onchange="taiDanhSachDiemDanh()" style="padding: 10px 15px; border-radius: 8px; border: 2px solid #e2ebf4; font-weight: bold; color: #001f3f; outline: none; cursor: pointer;">
                     <option value="CLB Lê Hữu Trác">CLB Lê Hữu Trác</option>
                     <option value="CLB Nguyễn Huệ">CLB Nguyễn Huệ</option>
                     <option value="CLB Hùng Vương">CLB Hùng Vương</option>
                     <option value="CLB Y Ngông">CLB Y Ngông</option>
                     <option value="CLB Nội Trú">CLB Nội Trú</option>
                 </select>
-                <input type="date" class="filter-date" id="ngayDiemDanh">
+                
+                <input type="date" id="ngayDiemDanh" style="padding: 10px 15px; border-radius: 8px; border: 2px solid #e2ebf4; font-weight: bold; color: #001f3f; outline: none; cursor: pointer;">
             </div>
         </div>
 
-        <div class="attendance-list-box">
-            <table class="attendance-table">
+        <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow-x: auto; margin-bottom: 30px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Họ và Tên</th>
-                        <th>Cấp Đai</th>
-                        <th style="text-align: center;">Trạng Thái</th>
+                    <tr style="border-bottom: 2px solid #e2ebf4; color: #64748b; font-size: 14px;">
+                        <th style="padding: 15px; text-align: center; width: 10%;">STT</th>
+                        <th style="padding: 15px; width: 40%;">HỌ VÀ TÊN</th>
+                        <th style="padding: 15px; text-align: center; width: 25%;">CẤP ĐAI</th>
+                        <th style="padding: 15px; text-align: center; width: 25%;">TRẠNG THÁI</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td class="student-name">Phùng Lữ Ngọc Chung</td>
-                        <td><span class="rank-badge yellow-rank">Hoàng Đai I</span></td>
-                        <td class="status-cell">
-                            <div class="radio-toggle">
-                                <input type="radio" name="vs1" id="vs1_comat" value="Có mặt" checked>
-                                <label for="vs1_comat" class="label-present">✔ Có mặt</label>
-                                
-                                <input type="radio" name="vs1" id="vs1_vang" value="Vắng">
-                                <label for="vs1_vang" class="label-absent">❌ Vắng</label>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>2</td>
-                        <td class="student-name">Nguyễn Thị Cẩm Tiên</td>
-                        <td><span class="rank-badge yellow-rank">Hoàng Đai I</span></td>
-                        <td class="status-cell">
-                            <div class="radio-toggle">
-                                <input type="radio" name="vs2" id="vs2_comat" value="Có mặt">
-                                <label for="vs2_comat" class="label-present">✔ Có mặt</label>
-                                
-                                <input type="radio" name="vs2" id="vs2_vang" value="Vắng" checked>
-                                <label for="vs2_vang" class="label-absent">❌ Vắng</label>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>3</td>
-                        <td class="student-name">Trần Gia Huy</td>
-                        <td><span class="rank-badge blue-rank">Lam đai</span></td>
-                        <td class="status-cell">
-                            <div class="radio-toggle">
-                                <input type="radio" name="vs3" id="vs3_comat" value="Có mặt" checked>
-                                <label for="vs3_comat" class="label-present">✔ Có mặt</label>
-                                
-                                <input type="radio" name="vs3" id="vs3_vang" value="Vắng">
-                                <label for="vs3_vang" class="label-absent">❌ Vắng</label>
-                            </div>
-                        </td>
-                    </tr>
+                <tbody id="bodyDanhSachDiemDanh">
+                    <tr><td colspan="4" style="text-align:center; padding: 30px; font-weight:bold; color:#64748b;">⏳ Đang tải danh sách võ sinh từ hệ thống...</td></tr>
                 </tbody>
             </table>
-            
-            <div class="attendance-actions">
-                <button class="btn-save-attendance">💾 LƯU DANH SÁCH ĐIỂM DANH</button>
-            </div>
         </div>
+
+        <div style="text-align: right;">
+            <button class="btn-save-attendance" style="background: #0056b3; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0, 86, 179, 0.3);">💾 LƯU DANH SÁCH ĐIỂM DANH</button>
+        </div>
+        
     </main>
 
     <footer class="footer">

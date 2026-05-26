@@ -83,10 +83,28 @@ function hienThiTrangGioHang() {
 
     khungDanhSach.innerHTML = html;
     
-    // Định dạng lại số tiền cho đẹp (VD: 340000 -> 340.000 VNĐ)
-    let tongTienFormat = tongTien.toLocaleString('vi-VN') + " VNĐ";
-    if (txtTongTienGoc) txtTongTienGoc.innerText = tongTienFormat;
-    if (txtTongTienThanhToan) txtTongTienThanhToan.innerText = tongTienFormat;
+    // TÍNH TOÁN GIẢM GIÁ & TỔNG TIỀN MỚI
+    let tienDuocGiam = tongTien * (phanTramGiamGia / 100);
+    let tienCanThanhToan = tongTien - tienDuocGiam;
+
+    // Hiển thị lên web
+    if (txtTongTienGoc) txtTongTienGoc.innerText = tongTien.toLocaleString('vi-VN') + " VNĐ";
+    
+    const dongGiamGia = document.getElementById('dongGiamGia');
+    const txtSoTienGiam = document.getElementById('soTienGiam');
+
+    if (phanTramGiamGia > 0 && dongGiamGia) {
+        dongGiamGia.style.display = "flex"; // Hiện dòng giảm giá lên
+        txtSoTienGiam.innerText = "- " + tienDuocGiam.toLocaleString('vi-VN') + " VNĐ";
+    } else if (dongGiamGia) {
+        dongGiamGia.style.display = "none"; // Ẩn đi nếu không có mã
+    }
+
+    if (txtTongTienThanhToan) txtTongTienThanhToan.innerText = tienCanThanhToan.toLocaleString('vi-VN') + " VNĐ";
+
+    // LƯU LẠI TỔNG TIỀN CUỐI CÙNG ĐỂ LÚC BẤM ĐẶT HÀNG MÓC RA DÙNG
+    window.tongTienCuoiCungSo = tienCanThanhToan;
+    window.tongTienCuoiCungChuoi = tienCanThanhToan.toLocaleString('vi-VN') + " VNĐ";
 }
 
 // 5. Hàm đổi số lượng khi người dùng gõ số khác
@@ -104,6 +122,57 @@ function xoaKhoiGio(index) {
     localStorage.setItem('gioHangVovinam', JSON.stringify(gioHang));
     capNhatSoLuongGioHang();
     hienThiTrangGioHang();
+}
+
+// ==========================================
+// XỬ LÝ ĐỊA CHỈ & MÃ GIẢM GIÁ (TRANG GIỎ HÀNG)
+// ==========================================
+
+let phanTramGiamGia = 0; // Biến lưu % giảm giá
+
+// Hàm thay đổi câu hỏi địa chỉ
+function thayDoiHinhThucNhan() {
+    const hinhThuc = document.getElementById('dhHinhThuc').value;
+    const label = document.getElementById('labelDiaChi');
+    const input = document.getElementById('dhDiaChi');
+
+    if (hinhThuc === "TaiCLB") {
+        label.innerText = "Chọn CLB bạn đang theo tập:";
+        input.placeholder = "VD: CLB Nguyễn Huệ, CLB Y Ngông...";
+    } else {
+        label.innerText = "Nhập địa chỉ nhà riêng của bạn:";
+        input.placeholder = "VD: Số 123, đường ABC, xã XYZ...";
+    }
+}
+
+// Hàm kiểm tra mã giảm giá
+function apDungGiamGia() {
+    const maNhap = document.getElementById('maGiamGiaInput').value.trim().toUpperCase();
+    const thongBao = document.getElementById('thongBaoGiamGia');
+
+    // KHO MÃ GIẢM GIÁ CỦA BẠN (Bạn có thể thêm bớt tùy ý)
+    const danhSachMa = {
+        "VOVINAM10": 10,  // Giảm 10%
+        "EAMDROH20": 20,  // Giảm 20%
+        "CHUNGDZ": 50     // Giảm 50% (Mã bí mật cho Admin)
+    };
+
+    if (maNhap === "") {
+        thongBao.innerText = "Vui lòng nhập mã giảm giá!";
+        thongBao.style.color = "#e53e3e";
+        phanTramGiamGia = 0;
+    } else if (danhSachMa[maNhap]) {
+        phanTramGiamGia = danhSachMa[maNhap];
+        thongBao.innerText = `✅ Áp dụng thành công! Bạn được giảm ${phanTramGiamGia}%`;
+        thongBao.style.color = "#10b981";
+    } else {
+        thongBao.innerText = "❌ Mã giảm giá không hợp lệ hoặc đã hết hạn!";
+        thongBao.style.color = "#e53e3e";
+        phanTramGiamGia = 0;
+    }
+    
+    // Gọi lại hàm hiển thị giỏ hàng để nó tính lại tiền
+    hienThiTrangGioHang(); 
 }
 
 // 7. Khởi chạy các tính năng khi trang web vừa tải xong
@@ -126,23 +195,6 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// 2. TÍNH NĂNG ĐIỂM DANH
-const danhSachNutDiemDanh = document.querySelectorAll('.btn-status');
-if (danhSachNutDiemDanh.length > 0) {
-    danhSachNutDiemDanh.forEach(nut => {
-        nut.addEventListener('click', function() {
-            if (this.classList.contains('present')) {
-                this.classList.remove('present');
-                this.classList.add('absent');
-                this.innerText = 'Vắng';
-            } else {
-                this.classList.remove('absent');
-                this.classList.add('present');
-                this.innerText = 'Có mặt';
-            }
-        });
-    });
-}
 
 // 3. TÍNH NĂNG LỌC SẢN PHẨM
 function locSanPham(loaiSanPham, nutDuocBam) {
@@ -586,71 +638,6 @@ function dangXuatTaiKhoan() {
     window.location.href = 'index.html';
 }
 
-// ========================================================
-// XỬ LÝ LƯU DANH SÁCH ĐIỂM DANH LÊN GOOGLE SHEETS
-// ========================================================
-window.addEventListener('DOMContentLoaded', function() {
-    // 1. Tự động điền ngày hôm nay vào ô Date
-    const oNgay = document.getElementById('ngayDiemDanh');
-    if (oNgay) {
-        const homNay = new Date().toISOString().split('T')[0];
-        oNgay.value = homNay;
-    }
-
-    // 2. Bắt sự kiện khi bấm nút Lưu Điểm Danh
-    const nutLuuDiemDanh = document.querySelector('.btn-save-attendance');
-    if (nutLuuDiemDanh) {
-        nutLuuDiemDanh.addEventListener('click', function() {
-            const clbDaChon = document.querySelector('.filter-select').value;
-            const ngayDiemDanh = document.getElementById('ngayDiemDanh').value;
-
-            if (!ngayDiemDanh) {
-                alert("⚠️ Vui lòng chọn ngày điểm danh trước khi lưu!");
-                return;
-            }
-
-            nutLuuDiemDanh.innerText = "⏳ Đang gửi dữ liệu...";
-            nutLuuDiemDanh.disabled = true;
-
-            const mangVoSinh = [];
-            
-            // Lấy trạng thái điểm danh
-            const trangThaiVS1 = document.querySelector('input[name="vs1"]:checked').value;
-            mangVoSinh.push({ ten: "Phùng Lữ Ngọc Chung", trangThai: trangThaiVS1 });
-
-            const trangThaiVS2 = document.querySelector('input[name="vs2"]:checked').value;
-            mangVoSinh.push({ ten: "Nguyễn Thị Cẩm Tiên", trangThai: trangThaiVS2 });
-
-            const trangThaiVS3 = document.querySelector('input[name="vs3"]:checked').value;
-            mangVoSinh.push({ ten: "Trần Gia Huy", trangThai: trangThaiVS3 });
-
-            const goiDuLieuDiemDanh = {
-                action: 'saveAttendance',
-                clb: clbDaChon,
-                ngay: ngayDiemDanh,
-                danhSach: mangVoSinh
-            };
-
-            fetch(MANG_LUOI_GOOGLE, {
-                method: 'POST',
-                body: JSON.stringify(goiDuLieuDiemDanh)
-            })
-            .then(res => res.text())
-            .then(ketQua => {
-                if (ketQua === "LuuDiemDanhThanhCong") {
-                    alert("🎉 Tuyệt vời! Danh sách điểm danh đã được lưu trữ an toàn trên Google Sheets!");
-                } else {
-                    alert("Máy chủ trả về kết quả lạ: " + ketQua);
-                }
-            })
-            .catch(err => alert("❌ Lỗi mạng! Không thể truyền dữ liệu điểm danh đi."))
-            .finally(() => {
-                nutLuuDiemDanh.innerText = "💾 LƯU DANH SÁCH ĐIỂM DANH";
-                nutLuuDiemDanh.disabled = false;
-            });
-        });
-    }
-});
 
 // ========================================================
 // XỬ LÝ ĐỔI MẬT KHẨU TỰ ĐỘNG NHẬN DIỆN TÀI KHOẢN
@@ -756,13 +743,13 @@ function taiDanhSachMonSinh() {
     });
 }
 
-// 3. Hàm hiển thị dữ liệu ra các dòng HTML
+// 3. Hàm hiển thị dữ liệu ra các dòng HTML (ĐÃ CẬP NHẬT TÍNH NĂNG THĂNG CẤP ĐAI)
 function hienThiMonSinhRaBang(danhSach) {
     const bang = document.getElementById("bodyDanhSachMonSinh");
     if (!bang) return;
 
     if (danhSach.length === 0) {
-        bang.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 30px; color: #64748b;">Nơi này hiện tại trống trải...</td></tr>`;
+        bang.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 30px; color: #64748b;">Nơi này hiện tại trống trải...</td></tr>`;
         return;
     }
 
@@ -770,20 +757,37 @@ function hienThiMonSinhRaBang(danhSach) {
     const taiKhoanAdminDangDung = localStorage.getItem("taiKhoanDangNhap");
 
     danhSach.forEach((ms, index) => {
-        // Cơ chế an toàn: Không cho phép Admin tự xóa chính mình khi đang đăng nhập
         let hanhDongNut = `<button onclick="guiLenhXoaMonSinh('${ms.taiKhoan}', '${ms.hoTen}')" style="background: #e53e3e; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;">❌ Xóa</button>`;
         if (ms.taiKhoan === taiKhoanAdminDangDung) {
             hanhDongNut = `<span style="color: #10b981; font-weight: bold; font-style: italic;">Bạn đang dùng</span>`;
         }
 
+        // Tạo danh sách các cấp đai để HLV bấm đổi trực tiếp
+        const cacCapDai = ["Tự vệ", "Lam đai", "Lam đai I", "Lam đai II", "Lam đai III", "Hoàng đai", "Hoàng đai I", "Hoàng đai II", "Hoàng đai III"];
+        let optionHtml = "";
+        cacCapDai.forEach(dai => {
+            let selected = (ms.capDai === dai) ? "selected" : "";
+            optionHtml += `<option value="${dai}" ${selected}>🥋 ${dai}</option>`;
+        });
+
         html += `
             <tr style="border-bottom: 1px solid #e2ebf4;">
                 <td style="padding: 15px; text-align: center; font-weight: bold; color: #64748b;">${index + 1}</td>
+                
                 <td style="padding: 15px; color: #001f3f;"><strong>${ms.hoTen}</strong></td>
+                
                 <td style="padding: 15px; color: #475569;">${ms.soDienThoai}</td>
-                <td style="padding: 15px;"><code>${ms.taiKhoan}</code></td>
-                <td style="padding: 15px;"><span style="background: #e2ebf4; color: #0056b3; padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 800;">${ms.clb}</span></td>
-                <td style="padding: 15px;"><span style="color: ${ms.vaiTro === 'Admin' ? '#e53e3e' : '#64748b'}; font-weight: 800;">${ms.vaiTro}</span></td>
+                
+                <td style="padding: 15px; text-align: center;"><span style="background: #e2ebf4; color: #0056b3; padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 800;">${ms.clb}</span></td>
+                
+                <td style="padding: 15px; text-align: center;">
+                    <select onchange="HLV_DoiCapDai('${ms.taiKhoan}', this.value, '${ms.hoTen}')" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: bold; color: #0056b3; cursor: pointer; outline: none;">
+                        ${optionHtml}
+                    </select>
+                </td>
+
+                <td style="padding: 15px; text-align: center;"><span style="color: ${ms.vaiTro === 'Admin' ? '#e53e3e' : '#64748b'}; font-weight: 800;">${ms.vaiTro}</span></td>
+                
                 <td style="padding: 15px; text-align: center;">${hanhDongNut}</td>
             </tr>
         `;
@@ -872,14 +876,22 @@ window.addEventListener('DOMContentLoaded', function() {
             const noiDungChuyenKhoan = `${hoTen} - ${maDon}`; 
 
             let chiTietDon = "";
-            let tongTienSo = 0;
+            let tongTienGocSo = 0; 
             
             gioHang.forEach(sp => {
                 let giaSo = parseInt(sp.gia.replace(/\./g, '').replace(' VNĐ', ''));
-                tongTienSo += giaSo * sp.soLuong;
+                tongTienGocSo += giaSo * sp.soLuong;
                 chiTietDon += `- ${sp.soLuong}x ${sp.ten} (Size: ${sp.size})\n`; 
             });
-            let tongTienChuoi = tongTienSo.toLocaleString('vi-VN') + " VNĐ";
+
+            // Báo cho Admin biết khách đã dùng mã giảm giá
+            if (phanTramGiamGia > 0) {
+                chiTietDon += `\n🎁 Đã dùng mã giảm giá: ${phanTramGiamGia}%`;
+            }
+
+            // Móc số tiền đã trừ khuyến mãi từ trên xuống để đưa vào QR Code
+            let tongTienSo = window.tongTienCuoiCungSo || tongTienGocSo;
+            let tongTienChuoi = window.tongTienCuoiCungChuoi || (tongTienGocSo.toLocaleString('vi-VN') + " VNĐ");
 
             nutBam.innerText = "🚀 ĐANG GỬI ĐƠN HÀNG...";
             nutBam.disabled = true;
@@ -1003,4 +1015,203 @@ function dongPopupQR() {
         popup.style.display = 'none';
         window.location.href = 'cuahang.html'; // Đóng xong thì đẩy khách về lại cửa hàng mua tiếp
     }
+}
+
+// ========================================================
+// HỆ THỐNG ĐIỂM DANH TỰ ĐỘNG (ĐỒNG BỘ TỪ GOOGLE SHEETS)
+// ========================================================
+
+let khoMonSinhDiemDanh = []; // Kho lưu trữ tạm để lọc
+
+// 1. Khởi chạy khi mở trang Điểm danh
+window.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById("bodyDanhSachDiemDanh")) {
+        // Tự điền ngày hôm nay
+        const oNgay = document.getElementById('ngayDiemDanh');
+        if (oNgay) oNgay.value = new Date().toISOString().split('T')[0];
+
+        // Kéo danh sách toàn bộ môn sinh từ Sheets về
+        layDuLieuMonSinhDeDiemDanh();
+        
+        // Bắt sự kiện cho nút Lưu Điểm Danh
+        kichHoatNutLuuDiemDanh();
+    }
+});
+
+// 2. Hàm gọi Google lấy dữ liệu môn sinh
+function layDuLieuMonSinhDeDiemDanh() {
+    const bang = document.getElementById("bodyDanhSachDiemDanh");
+    
+    // CÁI KHIÊN ĐÂY: Nếu không tìm thấy bảng điểm danh thì dừng lại ngay, không báo lỗi!
+    if (!bang) return; 
+
+    bang.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 30px; font-weight:bold; color:#64748b;">⏳ Đang tải danh sách võ sinh từ hệ thống...</td></tr>`;
+
+    fetch(MANG_LUOI_GOOGLE, {
+        method: "POST",
+        body: JSON.stringify({ action: "getUsers" })
+    })
+    .then(res => res.json())
+    .then(danhSach => {
+        khoMonSinhDiemDanh = danhSach; 
+        taiDanhSachDiemDanh(); 
+    })
+    .catch(err => {
+        bang.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #e53e3e; font-weight:bold;">❌ Lỗi tải dữ liệu. Hãy kiểm tra mạng!</td></tr>`;
+    });
+}
+
+// 3. Hàm lọc theo CLB và vẽ HTML ra bảng (ĐÃ CÓ CẤP ĐAI + NÚT BẤM ĐẸP)
+function taiDanhSachDiemDanh() {
+    const bang = document.getElementById("bodyDanhSachDiemDanh");
+    const clbChon = document.getElementById('clbDiemDanh').value;
+    if(!bang) return;
+
+    // Lọc ra những bạn thuộc CLB đang chọn và không phải là Admin
+    const danhSachLoc = khoMonSinhDiemDanh.filter(ms => ms.clb === clbChon && ms.vaiTro !== "Admin");
+
+    if (danhSachLoc.length === 0) {
+        bang.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 30px; color:#64748b;">Chưa có môn sinh nào thuộc Câu lạc bộ này đăng ký hệ thống.</td></tr>`;
+        return;
+    }
+
+    let html = "";
+    danhSachLoc.forEach((ms, index) => {
+        // Trạng thái mặc định
+        const defaultStatus = 'Có mặt';
+        const defaultClass = 'present';
+        ms.lastAttendanceStatus = defaultStatus; // Ghi nhớ trạng thái
+
+        // Logic gán Cấp đai và Màu sắc
+        let capDai = ms.capDai || "Lam đai";
+        let colorClass = "belt-lam-dai"; 
+        
+        if (capDai.includes("Hoàng")) colorClass = "belt-hoang-dai";
+        else if (capDai.includes("Tự vệ")) colorClass = "belt-tu-ve";
+
+        html += `
+            <tr style="border-bottom: 1px dashed #e2ebf4;">
+                <td style="padding: 15px; text-align: center; font-weight: bold; color: #64748b;">${index + 1}</td>
+                <td style="padding: 15px; font-weight: bold; color: #001f3f; font-size: 16px;">${ms.hoTen}</td>
+                
+                <td style="padding: 15px; text-align: center;">
+                    <span class="belt-badge ${colorClass}">${capDai}</span>
+                </td>
+                
+                <td style="padding: 15px; text-align: center;">
+                    <div style="display: flex; justify-content: center;">
+                        <span class="status-toggle ${defaultClass}" onclick="toggleAttendanceStatus(this, '${ms.taiKhoan}')">
+                            ${defaultStatus}
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    bang.innerHTML = html;
+}
+
+// 4. Hàm đóng gói và Gửi điểm danh
+function kichHoatNutLuuDiemDanh() {
+    const nutLuu = document.querySelector('.btn-save-attendance');
+    if (!nutLuu) return;
+
+    nutLuu.addEventListener('click', function() {
+        const clbDaChon = document.getElementById('clbDiemDanh').value;
+        const ngayDiemDanh = document.getElementById('ngayDiemDanh').value;
+
+        if (!ngayDiemDanh) {
+            alert("⚠️ Vui lòng chọn ngày điểm danh!");
+            return;
+        }
+
+        nutLuu.innerText = "⏳ Đang gửi dữ liệu...";
+        nutLuu.disabled = true;
+
+        const mangVoSinh = [];
+        const danhSachLoc = khoMonSinhDiemDanh.filter(ms => ms.clb === clbDaChon && ms.vaiTro !== "Admin");
+
+        // Quét từng môn sinh để lấy trạng thái mới nhất
+        danhSachLoc.forEach(ms => {
+            const trangThai = ms.lastAttendanceStatus || "Có mặt"; 
+            mangVoSinh.push({ ten: ms.hoTen, trangThai: trangThai });
+        });
+
+        if(mangVoSinh.length === 0) {
+             alert("❌ Không có dữ liệu môn sinh để lưu!");
+             nutLuu.innerText = "💾 LƯU DANH SÁCH ĐIỂM DANH";
+             nutLuu.disabled = false;
+             return;
+        }
+
+        const goiDuLieu = {
+            action: 'saveAttendance',
+            clb: clbDaChon,
+            ngay: ngayDiemDanh,
+            danhSach: mangVoSinh
+        };
+
+        fetch(MANG_LUOI_GOOGLE, {
+            method: 'POST',
+            body: JSON.stringify(goiDuLieu)
+        })
+        .then(res => res.text())
+        .then(ketQua => {
+            if (ketQua === "LuuDiemDanhThanhCong") {
+                alert(`🎉 Đã lưu Điểm danh ngày ${ngayDiemDanh} cho ${clbDaChon} thành công vào Google Sheets!`);
+            } else {
+                alert("Máy chủ báo lỗi: " + ketQua);
+            }
+        })
+        .catch(err => alert("❌ Lỗi mạng! Không thể truyền dữ liệu điểm danh đi."))
+        .finally(() => {
+            nutLuu.innerText = "💾 LƯU DANH SÁCH ĐIỂM DANH";
+            nutLuu.disabled = false;
+        });
+    });
+}
+
+// 5. Hàm toggle trạng thái điểm danh khi bấm vào nút
+function toggleAttendanceStatus(element, userAccount) {
+    // Đổi màu và đổi chữ
+    if (element.classList.contains('present')) {
+        element.classList.remove('present');
+        element.classList.add('absent');
+        element.innerText = 'Vắng';
+    } else {
+        element.classList.remove('absent');
+        element.classList.add('present');
+        element.innerText = 'Có mặt';
+    }
+    
+    // Tìm môn sinh đó trong kho và cập nhật lại biến trạng thái để chuẩn bị gửi đi
+    const ms = khoMonSinhDiemDanh.find(item => item.taiKhoan === userAccount);
+    if (ms) {
+        ms.lastAttendanceStatus = element.innerText; 
+    }
+}
+
+// Hàm gửi lệnh đổi cấp đai lên Google Sheets khi HLV chọn đai khác
+function HLV_DoiCapDai(taiKhoanNguoiDung, capDaiMoi, tenVoSinh) {
+    fetch(MANG_LUOI_GOOGLE, {
+        method: "POST",
+        body: JSON.stringify({ action: "updateBelt", taiKhoan: taiKhoanNguoiDung, capDaiMoi: capDaiMoi })
+    })
+    .then(res => res.text())
+    .then(ketQua => {
+        if (ketQua === "CapNhatDaiThanhCong") {
+            alert(`🥋 Đã thăng cấp đai cho võ sinh [ ${tenVoSinh} ] thành [ ${capDaiMoi} ] thành công trên Google Sheets!`);
+            
+            // Chỉ gọi hàm cập nhật điểm danh nếu bảng điểm danh thực sự tồn tại trên trang
+            if (document.getElementById("bodyDanhSachDiemDanh") && typeof layDuLieuMonSinhDeDiemDanh === 'function') {
+                layDuLieuMonSinhDeDiemDanh();
+            }
+        } else {
+            alert("Lỗi máy chủ: " + ketQua);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ Thao tác thất bại do lỗi mạng hoặc lỗi hệ thống!");
+    });
 }

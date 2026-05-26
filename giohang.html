@@ -48,15 +48,32 @@
                 <form id="formDatHang" class="checkout-form">
                     <div class="form-group">
                         <label>Họ và tên người nhận:</label>
-                        <input type="text" id="dhHoTen" placeholder="Nhập tên của bạn..." required>
+                        <input type="text" id="dhHoTen" class="form-control" placeholder="Nhập tên của bạn..." required>
                     </div>
                     <div class="form-group">
                         <label>Số điện thoại liên hệ:</label>
-                        <input type="tel" id="dhSoDienThoai" placeholder="Nhập số điện thoại..." required>
+                        <input type="tel" id="dhSoDienThoai" class="form-control" placeholder="Nhập số điện thoại..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Hình thức nhận hàng:</label>
+                        <select id="dhHinhThuc" class="form-control" onchange="thayDoiHinhThucNhan()" style="cursor: pointer;">
+                            <option value="TaiCLB">📍 Nhận trực tiếp tại Câu Lạc Bộ</option>
+                            <option value="GiaoTanNoi">🚚 Giao hàng tận nơi (Nhà riêng)</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>Địa chỉ nhận hàng (CLB đang tập hoặc nhà riêng):</label>
-                        <textarea id="dhDiaChi" rows="3" placeholder="VD: CLB Nguyễn Huệ..." required></textarea>
+                        <label id="labelDiaChi">Chọn CLB bạn đang theo tập:</label>
+                        <textarea id="dhDiaChi" class="form-control" rows="2" placeholder="VD: CLB Nguyễn Huệ, CLB Y Ngông..." required></textarea>
+                    </div>
+
+                    <div class="discount-wrapper">
+                        <label style="font-weight: bold; font-size: 14px; color: #001f3f;">🎁 Mã giảm giá (Nếu có):</label>
+                        <div class="discount-box">
+                            <input type="text" id="maGiamGiaInput" placeholder="Nhập mã voucher..." style="text-transform: uppercase;">
+                            <button type="button" class="btn-apply" onclick="apDungGiamGia()">Áp dụng</button>
+                        </div>
+                        <p id="thongBaoGiamGia" style="font-size: 13px; font-weight: bold; margin-top: 5px;"></p>
                     </div>
                     
                     <div class="cart-summary-box">
@@ -64,6 +81,12 @@
                             <span>Tạm tính:</span>
                             <strong id="tongTienGoc">0 VNĐ</strong>
                         </div>
+                        
+                        <div class="summary-row" id="dongGiamGia" style="display: none; color: #10b981;">
+                            <span>Voucher giảm:</span>
+                            <strong id="soTienGiam">- 0 VNĐ</strong>
+                        </div>
+
                         <div class="summary-row">
                             <span>Phí vận chuyển:</span>
                             <strong>Miễn phí</strong>

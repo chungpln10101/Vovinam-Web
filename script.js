@@ -1,17 +1,130 @@
-// 1. TÍNH NĂNG THÊM GIỎ HÀNG
-let soLuongGioHang = 0;
-const danhSachNutThem = document.querySelectorAll('.btn-add-cart');
-const hienThiSoLuong = document.querySelector('.cart-count');
+// ========================================================
+// HỆ THỐNG GIỎ HÀNG THÔNG MINH (LƯU TRỮ VĨNH VIỄN)
+// ========================================================
 
-if (danhSachNutThem.length > 0) {
-    danhSachNutThem.forEach(nut => {
-        nut.addEventListener('click', function() {
-            soLuongGioHang++;
-            hienThiSoLuong.innerText = soLuongGioHang;
-            alert("Đã thêm sản phẩm vào giỏ hàng thành công!");
-        });
-    });
+// 1. Khởi tạo giỏ hàng từ bộ nhớ trình duyệt (nếu chưa có thì tạo mảng rỗng)
+let gioHang = JSON.parse(localStorage.getItem('gioHangVovinam')) || [];
+
+// 2. Hàm cập nhật số lượng nhỏ hiển thị trên nút Giỏ hàng ở Cửa hàng
+function capNhatSoLuongGioHang() {
+    const hienThiSoLuong = document.querySelector('.cart-count'); // Nút giỏ hàng ở cuahang.html
+    if (hienThiSoLuong) {
+        let tongSoLg = 0;
+        gioHang.forEach(sp => tongSoLg += sp.soLuong);
+        hienThiSoLuong.innerText = tongSoLg;
+    }
 }
+
+// 3. Hàm Thêm sản phẩm vào giỏ (Dùng chung cho mọi nơi)
+function themVaoGio(idSanPham, size = "Mặc định", soLuong = 1) {
+    const spKho = khoSanPham[idSanPham];
+    if (!spKho) return;
+
+    // Kiểm tra xem món này (cùng ID, cùng Size) đã có trong giỏ chưa
+    const index = gioHang.findIndex(item => item.id === idSanPham && item.size === size);
+    
+    if (index > -1) {
+        gioHang[index].soLuong += parseInt(soLuong); // Có rồi thì cộng dồn số lượng
+    } else {
+        gioHang.push({
+            id: idSanPham,
+            ten: spKho.ten,
+            gia: spKho.gia, 
+            anh: spKho.anh,
+            size: size,
+            soLuong: parseInt(soLuong)
+        });
+    }
+    
+    // Lưu lại vào bộ nhớ và báo cáo
+    localStorage.setItem('gioHangVovinam', JSON.stringify(gioHang));
+    capNhatSoLuongGioHang();
+    alert("🛒 Đã thêm thành công:\n" + spKho.ten + " (Size: " + size + ") vào giỏ hàng!");
+}
+
+// 4. Hàm vẽ giao diện Giỏ hàng ra trang giohang.html
+function hienThiTrangGioHang() {
+    const khungDanhSach = document.getElementById('danhSachTrongGio');
+    const txtTongTienGoc = document.getElementById('tongTienGoc');
+    const txtTongTienThanhToan = document.getElementById('tongTienThanhToan');
+    
+    if (!khungDanhSach) return; // Nếu không đứng ở trang Giỏ hàng thì bỏ qua
+
+    if (gioHang.length === 0) {
+        khungDanhSach.innerHTML = `<p style="text-align:center; padding: 40px; color:#64748b; font-size: 18px; font-weight:bold;">Giỏ hàng của bạn đang trống.</p>`;
+        if (txtTongTienGoc) txtTongTienGoc.innerText = "0 VNĐ";
+        if (txtTongTienThanhToan) txtTongTienThanhToan.innerText = "0 VNĐ";
+        return;
+    }
+
+    let html = "";
+    let tongTien = 0;
+
+    gioHang.forEach((item, index) => {
+        // Biến chữ "170.000 VNĐ" thành số 170000 để máy tính cộng trừ được
+        let giaSo = parseInt(item.gia.replace(/\./g, '').replace(' VNĐ', ''));
+        tongTien += giaSo * item.soLuong;
+
+        html += `
+            <div class="cart-item">
+                <img src="${item.anh}" alt="${item.ten}">
+                <div class="item-details">
+                    <h3>${item.ten}</h3>
+                    <p>Size: ${item.size}</p>
+                    <span class="item-price">${item.gia}</span>
+                </div>
+                <div class="item-actions">
+                    <input type="number" value="${item.soLuong}" min="1" class="cart-qty" onchange="doiSoLuongTrongGio(${index}, this.value)">
+                    <button class="btn-remove" onclick="xoaKhoiGio(${index})">🗑️ Xóa bỏ</button>
+                </div>
+            </div>
+        `;
+    });
+
+    khungDanhSach.innerHTML = html;
+    
+    // Định dạng lại số tiền cho đẹp (VD: 340000 -> 340.000 VNĐ)
+    let tongTienFormat = tongTien.toLocaleString('vi-VN') + " VNĐ";
+    if (txtTongTienGoc) txtTongTienGoc.innerText = tongTienFormat;
+    if (txtTongTienThanhToan) txtTongTienThanhToan.innerText = tongTienFormat;
+}
+
+// 5. Hàm đổi số lượng khi người dùng gõ số khác
+function doiSoLuongTrongGio(index, soLuongMoi) {
+    if (soLuongMoi < 1) soLuongMoi = 1;
+    gioHang[index].soLuong = parseInt(soLuongMoi);
+    localStorage.setItem('gioHangVovinam', JSON.stringify(gioHang));
+    capNhatSoLuongGioHang();
+    hienThiTrangGioHang(); // Vẽ lại giao diện để tiền thay đổi tức thì
+}
+
+// 6. Hàm xóa 1 món khỏi giỏ
+function xoaKhoiGio(index) {
+    gioHang.splice(index, 1);
+    localStorage.setItem('gioHangVovinam', JSON.stringify(gioHang));
+    capNhatSoLuongGioHang();
+    hienThiTrangGioHang();
+}
+
+// 7. Khởi chạy các tính năng khi trang web vừa tải xong
+window.addEventListener('DOMContentLoaded', function() {
+    capNhatSoLuongGioHang(); // Luôn cập nhật số lượng ở mọi trang
+    hienThiTrangGioHang();   // Vẽ giỏ hàng nếu đang ở trang giohang.html
+
+    // Bắt sự kiện bấm nút Thêm vào giỏ ở TRANG CHI TIẾT
+    const nutThemChiTiet = document.querySelector('.btn-add-cart-large');
+    if (nutThemChiTiet && window.location.pathname.includes("chitiet.html")) {
+        nutThemChiTiet.addEventListener('click', function() {
+            const idSanPham = new URLSearchParams(window.location.search).get('id');
+            const sizeSelect = document.getElementById('size-select');
+            const size = sizeSelect ? sizeSelect.options[sizeSelect.selectedIndex].text : "Mặc định";
+            const qtyInput = document.querySelector('.qty-input');
+            const soLuong = qtyInput ? qtyInput.value : 1;
+
+            themVaoGio(idSanPham, size, soLuong);
+        });
+    }
+});
 
 // 2. TÍNH NĂNG ĐIỂM DANH
 const danhSachNutDiemDanh = document.querySelectorAll('.btn-status');
@@ -179,37 +292,71 @@ if (formDangNhap) {
 // SỰ KIỆN TỰ ĐỔI THÔNG TIN SẢN PHẨM THEO ID (TRANG CHI TIẾT)
 // ========================================================
 
-// 1. Kho dữ liệu sản phẩm (Tí nữa tài khoản Admin sẽ chỉnh sửa trực tiếp vào kho này)
+// 1. Kho dữ liệu sản phẩm (Cập nhật giá chuẩn khớp với Cửa hàng)
 const khoSanPham = {
     "vo-phuc": {
         ten: "Võ Phục Vovinam Chuẩn Form",
-        gia: "170.000 VNĐ",
+        gia: "180.000 VNĐ",
         loai: "Võ phục",
-        anh: "vo-phuc.jpg",
+        anh: "vo-phuc.jpg", // Nhớ sửa tên ảnh cho khớp với máy bạn nếu cần
         moTa: "Võ phục Vovinam chất liệu vải Kaki bền bỉ, thấm hút mồ hôi cực tốt. Đường may chắc chắn, form áo chuẩn theo quy định của Liên đoàn Vovinam Việt Võ Đạo. Thích hợp cho võ sinh tập luyện cường độ cao và thi đấu."
     },
     "dai-vang": {
         ten: "Đai Vàng Vovinam Các Cấp",
-        gia: "170.000 VNĐ",
+        gia: "140.000 VNĐ",
         loai: "Phụ kiện",
         anh: "dai-vang.jpg",
         moTa: "Đai vàng dành cho võ sinh Vovinam đã qua kỳ thi thăng cấp đai chuẩn. Chất liệu vải mềm, bên trong có lớp lót dày dặn, đường chỉ may chần song song cực kỳ chắc chắn và đẹp mắt, không bị rách khi thắt."
     },
     "lam-dai": {
         ten: "Lam Đai Vovinam (Đai Xanh)",
-        gia: "170.000 VNĐ",
+        gia: "40.000 VNĐ",
         loai: "Phụ kiện",
         anh: "lam-dai.jpg",
         moTa: "Lam đai nhập khẩu, màu xanh dương chuẩn theo quy định võ phục. Vải dày, bền màu, không bị phai khi giặt. Thích hợp cho các bạn môn sinh mới nhập môn hoặc thăng cấp lớp Lam đai."
     },
     "kiem-nhom": {
         ten: "Kiếm Nhôm Vovinam Tập Luyện",
-        gia: "170.000 VNĐ",
+        gia: "420.000 VNĐ",
         loai: "Binh Khí",
         anh: "kiem-nhom.jpg",
         moTa: "Binh khí kiếm nhôm mô phỏng dành riêng cho các bài quyền Vovinam (như Tinh hoa lưỡng nghi kiếm pháp). Kiếm được mài nhẵn các cạnh, đảm bảo an toàn tuyệt đối khi tập luyện và biểu diễn, trọng lượng vừa tay."
     }
 };
+
+// 2. Tự động lấy ID từ đường link và đổ dữ liệu ra trang Chi tiết
+window.addEventListener('DOMContentLoaded', function() {
+    // Chỉ chạy đoạn mã này nếu đang đứng ở trang Chi tiết
+    if (window.location.pathname.includes("chitiet.html")) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sanPhamId = urlParams.get('id');
+
+        // Kiểm tra xem kho dữ liệu có tồn tại và có ID sản phẩm này không
+        if (sanPhamId && typeof khoSanPham !== 'undefined' && khoSanPham[sanPhamId]) {
+            const sp = khoSanPham[sanPhamId]; // Lôi món đồ từ kho ra
+
+            // Nhận diện chính xác 100% các ID trên giao diện của bạn
+            const anh = document.getElementById('anhChiTiet');
+            const ten = document.getElementById('tenChiTiet');
+            const gia = document.getElementById('giaChiTiet');
+            const loai = document.getElementById('loaiChiTiet');
+            const moTa = document.getElementById('moTaChiTiet');
+
+            // Bơm dữ liệu vào
+            if (anh) {
+                anh.src = sp.anh;
+                anh.alt = sp.ten;
+            }
+            if (ten) ten.innerText = sp.ten;
+            if (gia) gia.innerText = sp.gia;
+            if (loai) loai.innerText = sp.loai;
+            if (moTa) moTa.innerText = sp.moTa;
+            
+        } else {
+            console.log("Lỗi: Không tìm thấy ID sản phẩm hoặc kho dữ liệu chưa được tải!");
+        }
+    }
+});
 
 // ========================================================
 // CÁ NHÂN HÓA TRANG CHỦ THEO CÂU LẠC BỘ VÀ VAI TRÒ
@@ -688,3 +835,172 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// ========================================================
+// XỬ LÝ NÚT XÁC NHẬN ĐẶT HÀNG (TẠO MÃ QR TỰ ĐỘNG)
+// ========================================================
+window.addEventListener('DOMContentLoaded', function() {
+    const formDatHang = document.getElementById('formDatHang');
+    
+    // Hàm tạo mã đơn hàng ngẫu nhiên (VD: VN-8A3B)
+    function taoMaDonHang() {
+        const chu = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const so = '0123456789';
+        let ma = 'VN-';
+        for (let i = 0; i < 2; i++) ma += chu.charAt(Math.floor(Math.random() * chu.length));
+        for (let i = 0; i < 2; i++) ma += so.charAt(Math.floor(Math.random() * so.length));
+        return ma;
+    }
+
+    if (formDatHang) {
+        formDatHang.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+
+            if (gioHang.length === 0) {
+                alert("⚠️ Giỏ hàng của bạn đang trống!");
+                return;
+            }
+
+            const hoTen = document.getElementById('dhHoTen').value.trim();
+            const sdt = document.getElementById('dhSoDienThoai').value.trim();
+            const diaChi = document.getElementById('dhDiaChi').value.trim();
+            const nutBam = formDatHang.querySelector('.btn-checkout');
+
+            // Tạo mã đơn hàng & Nội dung chuyển khoản
+            const maDon = taoMaDonHang();
+            // Cú pháp: Tên người dùng - Mã đơn hàng
+            const noiDungChuyenKhoan = `${hoTen} - ${maDon}`; 
+
+            let chiTietDon = "";
+            let tongTienSo = 0;
+            
+            gioHang.forEach(sp => {
+                let giaSo = parseInt(sp.gia.replace(/\./g, '').replace(' VNĐ', ''));
+                tongTienSo += giaSo * sp.soLuong;
+                chiTietDon += `- ${sp.soLuong}x ${sp.ten} (Size: ${sp.size})\n`; 
+            });
+            let tongTienChuoi = tongTienSo.toLocaleString('vi-VN') + " VNĐ";
+
+            nutBam.innerText = "🚀 ĐANG GỬI ĐƠN HÀNG...";
+            nutBam.disabled = true;
+
+            const goiDuLieu = {
+                action: 'order',
+                maDonHang: maDon, // Gửi mã đơn lên Google
+                hoTen: hoTen,
+                sdt: sdt,
+                diaChi: diaChi,
+                chiTiet: chiTietDon,
+                tongTien: tongTienChuoi
+            };
+
+            fetch(MANG_LUOI_GOOGLE, {
+                method: 'POST',
+                body: JSON.stringify(goiDuLieu)
+            })
+            .then(res => res.text())
+            .then(ketQua => {
+                if (ketQua === "DatHangThanhCong") {
+                    
+                    // ==========================================
+                    // CẤU HÌNH NGÂN HÀNG CỦA BẠN Ở ĐÂY
+                    // ==========================================
+                    const NGAN_HANG = "VCB"; // Thay bằng mã ngân hàng của bạn (VCB, TCB, BIDV...)
+                    const SO_TAI_KHOAN = "7775922038"; // Số tài khoản của bạn
+                    
+                    // Tạo link ảnh QR động thông qua API của VietQR
+                    const linkQRDong = `https://img.vietqr.io/image/${NGAN_HANG}-${SO_TAI_KHOAN}-compact2.png?amount=${tongTienSo}&addInfo=${encodeURIComponent(noiDungChuyenKhoan)}`;
+
+                    // Gắn ảnh và thông tin vào Popup
+                    const popup = document.getElementById('popupThanhToan');
+                    const imgQR = popup.querySelector('.qr-code-container img');
+                    const txtTien = document.getElementById('qrTongTien');
+                    const txtNoiDung = document.getElementById('qrNoiDung');
+
+                    if (popup) {
+                        imgQR.src = linkQRDong; // Tráo ảnh tĩnh thành ảnh động
+                        txtTien.innerText = tongTienChuoi; 
+                        txtNoiDung.innerText = noiDungChuyenKhoan; 
+                        popup.style.display = "flex"; 
+                    }
+                    
+                    // Xóa giỏ hàng
+                    gioHang = [];
+                    localStorage.setItem('gioHangVovinam', JSON.stringify(gioHang));
+                    capNhatSoLuongGioHang();
+                    hienThiTrangGioHang();
+                    formDatHang.reset(); 
+                } else {
+                    alert("Lỗi máy chủ: " + ketQua);
+                }
+            })
+            .catch(err => alert("❌ Lỗi mạng! Không thể gửi đơn hàng."))
+            .finally(() => {
+                nutBam.innerText = "🚀 XÁC NHẬN ĐẶT HÀNG";
+                nutBam.disabled = false;
+            });
+        });
+    }
+});
+
+// 6. Hàm gọi Google Sheets để lấy danh sách Đơn hàng
+function taiDanhSachDonHang() {
+    const bangDonHang = document.getElementById("bodyDanhSachDonHang");
+    if (!bangDonHang) return;
+
+    bangDonHang.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color: #64748b; font-weight: bold;">⏳ Đang tải dữ liệu Hóa đơn từ hệ thống...</td></tr>`;
+
+    fetch(MANG_LUOI_GOOGLE, {
+        method: "POST",
+        body: JSON.stringify({ action: "getOrders" })
+    })
+    .then(res => res.json())
+    .then(danhSach => {
+        if (danhSach.length === 0) {
+            bangDonHang.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color: #64748b;">Chưa có đơn hàng nào phát sinh.</td></tr>`;
+            return;
+        }
+
+        let html = "";
+        danhSach.forEach(don => {
+            // Cắt gọt ngày tháng cho đẹp
+            let ngayDat = new Date(don.thoiGian).toLocaleString('vi-VN');
+
+            html += `
+                <tr style="border-bottom: 1px solid #e2ebf4;">
+                    <td style="padding: 15px; color: #64748b; font-size: 14px;">🕒 ${ngayDat}</td>
+                    <td style="padding: 15px;">
+                        <strong style="color: #001f3f; font-size: 16px;">${don.hoTen}</strong><br>
+                        <span style="font-size: 14px; color: #e53e3e; font-weight: bold;">📞 ${don.sdt}</span><br>
+                        <span style="font-size: 13px; color: #64748b;">📍 ${don.diaChi}</span>
+                    </td>
+                    <td style="padding: 15px; font-size: 14px; white-space: pre-line; color: #475569; line-height: 1.6;">${don.chiTiet}</td>
+                    <td style="padding: 15px; font-weight: 800; color: #e53e3e; font-size: 16px;">${don.tongTien}</td>
+                    <td style="padding: 15px; text-align: center;">
+                        <span style="background: #fef08a; color: #a16207; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 800;">${don.trangThai}</span>
+                    </td>
+                </tr>
+            `;
+        });
+        bangDonHang.innerHTML = html;
+    })
+    .catch(err => {
+        bangDonHang.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color: #e53e3e; font-weight: bold;">❌ Lỗi kết nối mạng, không thể tải danh sách đơn hàng!</td></tr>`;
+    });
+}
+
+// 7. Kích hoạt tải Đơn hàng khi vào trang Quản lý
+window.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById("bodyDanhSachDonHang")) {
+        taiDanhSachDonHang(); // Tự động chạy khi mở trang Admin
+    }
+});
+
+// Hàm đóng Popup QR Code
+function dongPopupQR() {
+    const popup = document.getElementById('popupThanhToan');
+    if (popup) {
+        popup.style.display = 'none';
+        window.location.href = 'cuahang.html'; // Đóng xong thì đẩy khách về lại cửa hàng mua tiếp
+    }
+}

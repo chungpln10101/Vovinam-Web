@@ -74,6 +74,42 @@
                     </tbody>
             </table>
         </div>
+
+        <div style="margin-top: 50px;">
+            <h3 style="color: #0056b3; font-size: 22px; margin-bottom: 20px;">📰 SOẠN THẢO TIN TỨC & SỰ KIỆN</h3>
+            <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                <form id="formDangTin">
+                    <div style="display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 300px;">
+                            <label style="font-weight: bold; color: #001f3f;">Tiêu đề bài viết:</label>
+                            <input type="text" id="tinTieuDe" required placeholder="VD: Khai giảng lớp Vovinam khóa mùa Hè..." style="width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none;">
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-weight: bold; color: #001f3f;">Chuyên mục:</label>
+                            <select id="tinChuyenMuc" style="width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; cursor: pointer;">
+                                <option value="Sự kiện Hot">🔥 Sự kiện Hot</option>
+                                <option value="Tuyển sinh">📢 Tuyển sinh</option>
+                                <option value="Thành tích">🏆 Thành tích</option>
+                                <option value="Hoạt động">🏃 Hoạt động</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: bold; color: #001f3f;">Link ảnh bìa:</label>
+                        <input type="url" id="tinLinkAnh" required placeholder="Dán đường link ảnh vào đây (VD: https://.../anh.jpg)" style="width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none;">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: bold; color: #001f3f;">Nội dung bài viết:</label>
+                        <textarea id="tinNoiDung" required rows="5" placeholder="Viết nội dung chi tiết của bản tin ở đây..." style="width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-post-news" style="background: #10b981; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);">🚀 ĐĂNG BÀI VIẾT LÊN TRANG CHỦ</button>
+                </form>
+            </div>
+        </div>
+
     </main>
     <footer class="footer">
         <div class="footer-container">
@@ -101,6 +137,23 @@
             <p>© 2026 Vovinam Việt Võ Đạo - Ea M'droh. Thiết kế và phát triển bởi Phùng Lữ Ngọc Chung.</p>
         </div>
     </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+            selector: '#tinNoiDung', // Nhắm đúng vào cái khung textarea của chúng ta
+            height: 400, // Chiều cao khung soạn thảo
+            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+            toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | removeformat | help',
+            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size:16px; }',
+            setup: function (editor) {
+                // Đảm bảo dữ liệu được đồng bộ vào textarea gốc khi người dùng gõ
+                editor.on('change', function () {
+                    tinymce.triggerSave();
+                });
+            }
+        });
+    </script>
 
     <script src="script.js"></script>
 </body>

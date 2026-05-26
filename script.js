@@ -1215,3 +1215,59 @@ function HLV_DoiCapDai(taiKhoanNguoiDung, capDaiMoi, tenVoSinh) {
         alert("❌ Thao tác thất bại do lỗi mạng hoặc lỗi hệ thống!");
     });
 }
+
+// ========================================================
+// XỬ LÝ FORM ĐĂNG TIN TỨC (QUẢN TRỊ ADMIN)
+// ========================================================
+window.addEventListener('DOMContentLoaded', function() {
+    const formDangTin = document.getElementById('formDangTin');
+    if (formDangTin) {
+        formDangTin.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const nutBam = formDangTin.querySelector('.btn-post-news');
+            nutBam.innerText = "⏳ ĐANG ĐẨY LÊN MÁY CHỦ...";
+            nutBam.disabled = true;
+
+            const tieuDe = document.getElementById('tinTieuDe').value.trim();
+            const chuyenMuc = document.getElementById('tinChuyenMuc').value;
+            const linkAnh = document.getElementById('tinLinkAnh').value.trim();
+            const noiDung = tinymce.get('tinNoiDung').getContent();
+
+            if (noiDung === "") {
+                alert("⚠️ Vui lòng viết nội dung cho bài báo!");
+                nutBam.innerText = "🚀 ĐĂNG BÀI VIẾT LÊN TRANG CHỦ";
+                nutBam.disabled = false;
+                return;
+            }
+
+            const goiDuLieu = {
+                action: 'addNews',
+                tieuDe: tieuDe,
+                chuyenMuc: chuyenMuc,
+                linkAnh: linkAnh,
+                noiDung: noiDung
+            };
+
+            fetch(MANG_LUOI_GOOGLE, {
+                method: 'POST',
+                body: JSON.stringify(goiDuLieu)
+            })
+            .then(res => res.text())
+            .then(ketQua => {
+                if (ketQua === "DangTinThanhCong") {
+                    alert("🎉 Đăng tin tức thành công! Dữ liệu đã được lưu an toàn vào Google Sheets.");
+                    formDangTin.reset(); 
+                    tinymce.get('tinNoiDung').setContent(''); // Xóa nội dung trong khung Word
+                } else {
+                    alert("Lỗi máy chủ: " + ketQua);
+                }
+            })
+            .catch(err => alert("❌ Lỗi mạng! Không thể đăng bản tin."))
+            .finally(() => {
+                nutBam.innerText = "🚀 ĐĂNG BÀI VIẾT LÊN TRANG CHỦ";
+                nutBam.disabled = false;
+            });
+        });
+    }
+});

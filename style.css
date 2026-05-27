@@ -1849,3 +1849,33 @@ button:active { transform: scale(0.95); transition: transform 0.1s; }
     background: #ffc107; 
     color: #001f3f; 
 }
+
+/* ========================================= */
+/* THÔNG BÁO NỔI (TOAST NOTIFICATION) */
+/* ========================================= */
+.toast-vovinam {
+    position: fixed;
+    top: 30px;
+    right: -400px; /* Mặc định giấu tít ra ngoài mép phải */
+    background: #ffffff;
+    color: #001f3f;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-left: 6px solid #16a34a; /* Cạnh viền màu Xanh lá (Thành công) */
+    font-weight: bold;
+    font-size: 15px;
+    z-index: 9999;
+    transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Hiệu ứng nảy trượt vào */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toast-vovinam.show {
+    right: 30px; /* Trượt vào trong màn hình */
+}
+
+.toast-vovinam.error {
+    border-left-color: #e53e3e; /* Cạnh viền màu Đỏ (Lỗi) */
+}

@@ -2109,37 +2109,68 @@ function thayDoiSoLuong(index, soThayDoi) {
 }
 
 // Bắt buộc phải để hàm này đứng độc lập, không lồng vào đâu cả
+window.MA_VOUCHER_DANG_DUNG = ""; // Thêm biến nhớ tên mã
+
 function apDungVoucher() {
     const oVoucher = document.getElementById("maVoucher");
-    if (!oVoucher) {
-        console.error("Lỗi: Không tìm thấy ô nhập Voucher!");
+    const hoTen = document.getElementById("tenNguoiNhan") ? document.getElementById("tenNguoiNhan").value.trim() : "";
+    const nutApDung = oVoucher.nextElementSibling; // Lấy cái nút bấm ngay bên cạnh
+
+    if (hoTen === "") {
+        hienThiThongBao("⚠️ Vui lòng nhập Họ Tên người nhận trước khi áp dụng Voucher!", "loi");
         return;
     }
 
     const ma = oVoucher.value.trim().toUpperCase();
-    
-    if (ma === "VOVINAM10") {
-        window.PHAN_TRAM_GIAM_GIA = 10; 
-        if (typeof hienThiThongBao === "function") {
-            hienThiThongBao("Áp dụng mã thành công! Bạn được giảm 10%.", "thanh-cong");
-        } else {
-            alert("Áp dụng mã thành công! Bạn được giảm 10%.");
-        }
-    } else if (ma === "") {
+    if (ma === "") {
         window.PHAN_TRAM_GIAM_GIA = 0;
-    } else {
-        window.PHAN_TRAM_GIAM_GIA = 0;
-        if (typeof hienThiThongBao === "function") {
-            hienThiThongBao("Mã giảm giá không hợp lệ hoặc đã hết hạn!", "loi");
-        } else {
-            alert("Mã giảm giá không hợp lệ hoặc đã hết hạn!");
-        }
+        window.MA_VOUCHER_DANG_DUNG = "";
+        taiGiaoDienGioHang();
+        return;
     }
-    taiGiaoDienGioHang(); // Bắt buộc gọi lại hàm này để nó tính lại tiền
+
+    // Hiệu ứng đang tải
+    nutApDung.innerText = "Đang check...";
+    nutApDung.style.opacity = "0.7";
+    nutApDung.disabled = true;
+
+    // Gửi mã và tên người dùng lên máy chủ để kiểm tra
+    fetch(MANG_LUOI_GOOGLE, {
+        method: "POST",
+        body: JSON.stringify({ action: "checkVoucher", maVoucher: ma, hoTen: hoTen })
+    })
+    .then(res => res.text())
+    .then(ketQua => {
+        // Phục hồi nút bấm
+        nutApDung.innerText = "Áp dụng";
+        nutApDung.style.opacity = "1";
+        nutApDung.disabled = false;
+
+        if (ketQua === "KhongHopLe") {
+            window.PHAN_TRAM_GIAM_GIA = 0;
+            window.MA_VOUCHER_DANG_DUNG = "";
+            hienThiThongBao("❌ Mã giảm giá không tồn tại hoặc đã bị Admin xóa!", "loi");
+        } else if (ketQua === "HetLuot") {
+            window.PHAN_TRAM_GIAM_GIA = 0;
+            window.MA_VOUCHER_DANG_DUNG = "";
+            hienThiThongBao("❌ Bạn đã hết lượt sử dụng mã giảm giá này!", "loi");
+        } else {
+            // Nhận được con số phần trăm từ máy chủ
+            window.PHAN_TRAM_GIAM_GIA = parseInt(ketQua);
+            window.MA_VOUCHER_DANG_DUNG = ma; // Lưu lại tên mã để lát gửi lên đơn hàng
+            hienThiThongBao(`🎉 Tuyệt vời! Bạn được giảm ${ketQua}% tổng đơn hàng!`, "thanh-cong");
+        }
+        taiGiaoDienGioHang();
+    })
+    .catch(err => {
+        nutApDung.innerText = "Áp dụng";
+        nutApDung.disabled = false;
+        hienThiThongBao("❌ Lỗi mạng khi kiểm tra mã!", "loi");
+    });
 }
 
 // ========================================================
-// HỆ THỐNG XÁC NHẬN ĐẶT HÀNG & TẠO MÃ QR (BẢN HOÀN CHỈNH)
+// HỆ THỐNG XÁC NHẬN ĐẶT HÀNG & TẠO MÃ QR (BẢN HOÀN CHỈNH ĐÃ NÂNG CẤP VOUCHER)
 // ========================================================
 function xacNhanDatHang() {
     try {
@@ -2172,10 +2203,11 @@ function xacNhanDatHang() {
             tongTien += Number(item.gia) * item.soLuong;
         });
 
+        // ĐÃ NÂNG CẤP: Lưu lại tên mã Voucher vào đơn hàng để máy chủ quét
         if (window.PHAN_TRAM_GIAM_GIA > 0) {
             let tienGiam = tongTien * (window.PHAN_TRAM_GIAM_GIA / 100);
             tongTien = tongTien - tienGiam;
-            chiTietDon += `\n🎁 Đã dùng mã giảm giá: ${window.PHAN_TRAM_GIAM_GIA}%`;
+            chiTietDon += `\n🎁 Đã dùng Mã Voucher: ${window.MA_VOUCHER_DANG_DUNG} (Giảm ${window.PHAN_TRAM_GIAM_GIA}%)`;
         }
         
         if (ghiChu !== "") {
@@ -2205,7 +2237,7 @@ function xacNhanDatHang() {
                 // 1. Xóa giỏ hàng
                 localStorage.removeItem("gioHangVovinam"); 
                 
-                // 2. THÔNG TIN NGÂN HÀNG
+                // 2. THÔNG TIN NGÂN HÀNG CỦA BẠN (Đã giữ nguyên VCB)
                 const maNganHang = "VCB"; 
                 const soTaiKhoan = "7775922038"; 
                 const tenTaiKhoan = "PHUNG LU NGOC CHUNG"; 
@@ -2221,7 +2253,7 @@ function xacNhanDatHang() {
                 document.getElementById("txtNganHang").innerText = maNganHang.toUpperCase();
                 document.getElementById("txtChuTaiKhoan").innerText = tenTaiKhoan;
 
-                // 5. HIỆN MÃ QR LÊN MÀN HÌNH (Và không dùng lệnh alert cũ nữa)
+                // 5. HIỆN MÃ QR LÊN MÀN HÌNH
                 document.getElementById("modalThanhToanQR").style.display = "flex";
                 hienThiThongBao("Tạo đơn thành công! Vui lòng quét mã thanh toán.", "thanh-cong");
             } else {
@@ -2267,3 +2299,4 @@ function hienThiThongBao(loiNhan, kieu = 'thanh-cong') {
         setTimeout(() => { toast.remove(); }, 500); // Đợi trượt ra xong thì xóa hẳn
     }, 3000);
 }
+
